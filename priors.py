@@ -3,8 +3,6 @@ import numpy as np
 import numpy.random as npr
 from scipy.special import gammaln
 
-from util import interleave
-
 # theta = times, vals
 # if we have k slopey bits, we have k+1 values and 2k times
 # i think we need to assume that the number of slopey bits is known... otherwise
@@ -42,6 +40,12 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
         diffs = np.concatenate((times[:1], np.diff(times)))
         flat_times, slopey_times = diffs[::2], diffs[1::2]
         return flat_times, slopey_times
+
+    def interleave(a, b):
+        out = np.empty((a.size + b.size,), dtype=a.dtype)
+        out[::2] = a
+        out[1::2] = b
+        return out
 
     logp_dwelltimes = gamma_log_density
     logp_levels = gamma_log_density
