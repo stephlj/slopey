@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import numpy.random as npr
 from scipy.special import gammaln
+import matplotlib.pyplot as plt
 
 # theta = times, vals
 # if we have k slopey bits, we have k+1 values and 2k times
@@ -53,3 +54,17 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
     sample_levels = gamma_sample
 
     return log_prior_density, sample_prior
+
+
+def plot_theta(theta):
+    times, vals = theta
+
+    def get_points(times, vals):
+        times = [0.] + list(times) + [times[-1] + 1]
+        return times, np.repeat(vals, 2)
+
+    xs, ys = get_points(times, vals)
+
+    plt.figure()
+    plt.plot(xs, ys)
+    plt.ylim(0., np.max(ys) + 1.)
