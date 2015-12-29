@@ -24,7 +24,8 @@ def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
     def noiseless_measurements(F, u):
         starts = u + np.arange(0., num_frames * T_cycle, T_cycle)
         stops = starts + T_cycle - T_blank
-        return (1./ (T_cycle - T_blank)) * (F(stops) - F(starts))
+        scale = 1. / (T_cycle - T_blank)
+        return scale * (F(stops) - F(starts))
 
     def loglike(z, theta, u):
         F = make_cdf(theta)
