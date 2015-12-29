@@ -8,8 +8,6 @@ from operator import itemgetter
 
 from util import make_piecewise, make_indicator_funcs, compose_pieces
 
-# TODO gotta scale cdf to be uniform
-
 # TODO prior:
 #   - need to be able to compute log prior
 
