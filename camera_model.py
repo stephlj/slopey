@@ -8,6 +8,8 @@ from operator import itemgetter
 
 from util import make_piecewise, make_indicator_funcs, compose_pieces
 
+# TODO gotta scale cdf to be uniform
+
 # TODO prior:
 #   - need to be able to compute log prior
 
@@ -24,7 +26,7 @@ def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
     def noiseless_measurements(F, u):
         starts = u + np.arange(0., num_frames * T_cycle, T_cycle)
         stops = starts + T_cycle - T_blank
-        return F(stops) - F(starts)
+        return (1./ (T_cycle - T_blank)) * (F(stops) - F(starts))
 
     def loglike(z, theta, u):
         F = make_cdf(theta)

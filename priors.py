@@ -65,6 +65,5 @@ def plot_theta(theta):
 
     xs, ys = get_points(times, vals)
 
-    plt.figure()
     plt.plot(xs, ys)
     plt.ylim(0., np.max(ys) + 1.)
