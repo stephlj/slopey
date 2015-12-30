@@ -20,11 +20,13 @@ colors = ['b', 'g', 'r']
 plt.figure(figsize=(8,6))
 for color, sample in zip(colors, samples):
     plt.stem(sample, 'k-', markerfmt=color + 'o')
-plt.savefig('frames.png')
+plt.xlabel('frame number')
+plt.savefig('plots/synth_frames.png')
 
 plt.figure(figsize=(8,6))
 plot_theta(theta)
-plt.savefig('trace.png')
+plt.xlabel('time (sec)')
+plt.savefig('plots/synth_trace.png')
 
 
 plt.show()
