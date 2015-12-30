@@ -67,7 +67,8 @@ def make_proposal(theta_proposal_params, u_proposal_params, T_cycle):
 
     def propose_u(u):
         scale = u_proposal_params
-        alpha, beta = u*scale, (1-u)*scale
+        frac = u / T_cycle
+        alpha, beta = frac*scale, (1-frac)*scale
         return T_cycle * beta_sample((alpha, beta))
 
     def propose_theta(theta):
@@ -97,8 +98,9 @@ def make_proposal(theta_proposal_params, u_proposal_params, T_cycle):
 
     def log_q_u(new_u, u):
         scale = u_proposal_params
-        alpha, beta = u*scale, (1-u)*scale
-        return beta_log_density(new_u / T_cycle, (alpha, beta)) - np.log(T_cycle)
+        new_frac, frac = new_u / T_cycle, u / T_cycle
+        alpha, beta = frac*scale, (1-frac)*scale
+        return beta_log_density(new_frac, (alpha, beta)) - np.log(T_cycle)
 
     def log_q_theta(new_theta, theta):
         def make_scorer(scale):
@@ -146,7 +148,7 @@ def integrate_dwelltimes(flat_times, slopey_times):
 
 ### plotting
 
-def plot_theta(theta, time_max=None, time_offset=0.):
+def plot_theta(theta, time_max=None, time_offset=0., **plot_kwargs):
     times, vals = theta
     time_max = time_max if time_max else times[-1] + 1
 
@@ -156,6 +158,6 @@ def plot_theta(theta, time_max=None, time_offset=0.):
 
     xs, ys = get_points(times, vals)
 
-    plt.plot(xs, ys)
+    plt.plot(xs, ys, **plot_kwargs)
     plt.ylim(0., np.max(ys) + 1.)
     plt.xlim(0., time_max - time_offset)
