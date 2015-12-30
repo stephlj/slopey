@@ -1,4 +1,5 @@
 TODO immediately
+- [x] fix bug in u proposal (T_cycle scaling)
 - [ ] mh sampling
 - [ ] hmc / nuts sampling (sampyl should work)
 

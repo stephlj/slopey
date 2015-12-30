@@ -58,7 +58,7 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
 
 ### prior-based proposal distributions for MH
 
-def make_proposal(theta_proposal_params, u_proposal_params):
+def make_proposal(theta_proposal_params, u_proposal_params, T_cycle):
     def propose(params):
         theta, u = params
         new_theta = propose_theta(theta)
@@ -68,7 +68,7 @@ def make_proposal(theta_proposal_params, u_proposal_params):
     def propose_u(u):
         scale = u_proposal_params
         alpha, beta = u*scale, (1-u)*scale
-        return beta_sample((alpha, beta))
+        return T_cycle * beta_sample((alpha, beta))
 
     def propose_theta(theta):
         def make_proposer(scale):
@@ -98,7 +98,7 @@ def make_proposal(theta_proposal_params, u_proposal_params):
     def log_q_u(new_u, u):
         scale = u_proposal_params
         alpha, beta = u*scale, (1-u)*scale
-        return beta_log_density(new_u, (alpha, beta))
+        return beta_log_density(new_u / T_cycle, (alpha, beta)) - np.log(T_cycle)
 
     def log_q_theta(new_theta, theta):
         def make_scorer(scale):
@@ -146,15 +146,16 @@ def integrate_dwelltimes(flat_times, slopey_times):
 
 ### plotting
 
-def plot_theta(theta, time_max=None):
+def plot_theta(theta, time_max=None, time_offset=0.):
     times, vals = theta
     time_max = time_max if time_max else times[-1] + 1
 
     def get_points(times, vals):
-        times = [0.] + list(times) + [time_max]
-        return times, np.repeat(vals, 2)
+        times = np.array([0.] + list(times) + [time_max])
+        return times - time_offset, np.repeat(vals, 2)
 
     xs, ys = get_points(times, vals)
 
     plt.plot(xs, ys)
     plt.ylim(0., np.max(ys) + 1.)
+    plt.xlim(0., time_max - time_offset)
