@@ -56,7 +56,7 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
     return log_prior_density, sample_prior
 
 
-### proposal distributions for MH
+### prior-based proposal distributions for MH
 
 def make_proposal(theta_proposal_params, u_proposal_params):
     def propose(params):
@@ -86,7 +86,7 @@ def make_proposal(theta_proposal_params, u_proposal_params):
 
         flat_times, slopey_times = split_dwelltimes(times)
         new_flat_times = propose_times(flat_times)
-        new_slopey_times = propse_tmes(slopey_times)
+        new_slopey_times = propose_times(slopey_times)
         new_times = integrate_dwelltimes(new_flat_times, new_slopey_times)
 
         return new_times, new_vals
@@ -134,6 +134,7 @@ def split_dwelltimes(times):
 
 def integrate_dwelltimes(flat_times, slopey_times):
     def interleave(a, b):
+        a, b = np.array(a), np.array(b)
         out = np.empty((a.size + b.size,), dtype=a.dtype)
         out[::2] = a
         out[1::2] = b
