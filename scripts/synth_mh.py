@@ -43,7 +43,7 @@ def log_p(x):
 # set up proposal distribution
 proposal_distn = make_proposal((1e3, 1e3), 1e3, T_cycle)
 
-# make a callback to print things
+# make a callback for measuring how often the mh sampler accepts
 accepts = []
 callback = lambda alpha, theta, accept: accepts.append(accept)
 
