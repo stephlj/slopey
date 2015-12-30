@@ -14,7 +14,7 @@ theta = times, vals
 _, camera_sample = \
     make_camera_model(0.1, 0.01, make_gaussian_model(sigmasq=0.01))
 
-samples = [camera_sample(theta, npr.uniform(), 45) for _ in xrange(3)]
+samples = [camera_sample(theta, npr.uniform() * 0.1, 45) for _ in xrange(3)]
 
 colors = ['b', 'g', 'r']
 plt.figure(figsize=(8,6))
