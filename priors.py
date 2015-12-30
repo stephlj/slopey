@@ -23,7 +23,7 @@ def gamma_sample(params, size=None):
 
 
 def make_prior(level_params, slopey_time_params, flat_time_params):
-    def log_prior_density(theta, u):
+    def log_prior_density(theta):
         times, vals = theta
         flat_times, slopey_times = split_dwelltimes(times)
         return logp_levels(vals, level_params) \
