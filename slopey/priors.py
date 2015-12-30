@@ -146,11 +146,12 @@ def integrate_dwelltimes(flat_times, slopey_times):
 
 ### plotting
 
-def plot_theta(theta):
+def plot_theta(theta, time_max=None):
     times, vals = theta
+    time_max = time_max if time_max else times[-1] + 1
 
     def get_points(times, vals):
-        times = [0.] + list(times) + [times[-1] + 1]
+        times = [0.] + list(times) + [time_max]
         return times, np.repeat(vals, 2)
 
     xs, ys = get_points(times, vals)

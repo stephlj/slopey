@@ -24,7 +24,7 @@ plt.xlabel('frame number')
 plt.savefig('plots/synth_frames.png')
 
 plt.figure(figsize=(8,6))
-plot_theta(theta)
+plot_theta(theta, 45*1./10)
 plt.xlabel('time (sec)')
 plt.savefig('plots/synth_trace.png')
 

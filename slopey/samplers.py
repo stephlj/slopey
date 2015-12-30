@@ -14,15 +14,15 @@ def run_mh(init_theta, log_p, proposal_distn, N):
     def flip_coin(p):
         return npr.uniform() < p
 
-    thetas = []
-    theta = init_theta
-
-    for n in xrange(N):
+    def step(theta):
         new_theta = propose(theta)
         alpha = np.exp(log_acceptance_prob(theta, new_theta))
-        print alpha
-        theta = new_theta if flip_coin(alpha) else theta
+        return new_theta if flip_coin(alpha) else theta
 
+    theta = init_theta
+    thetas = []
+    for n in xrange(N):
+        theta = step(theta)
         thetas.append(theta)
 
     return thetas
