@@ -8,15 +8,6 @@ from operator import itemgetter
 
 from util import make_piecewise, make_indicator_funcs, compose_pieces
 
-# TODO prior:
-#   - need to be able to compute log prior
-
-# TODO samplers:
-#   - mh
-#   - hmc / nuts sampling (sampyl should work)
-
-# TODO generate loglike automatically using prob prog
-
 
 def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
     noise_loglike, noise_sample = noise_model
