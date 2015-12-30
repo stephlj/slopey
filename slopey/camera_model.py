@@ -6,8 +6,6 @@ from itertools import cycle, chain
 from functools import partial
 from operator import itemgetter
 
-from util import make_piecewise, make_indicator_funcs, compose_pieces
-
 
 def make_camera_model(T_cycle, T_blank, noise_model):
     noise_loglike, noise_sample = noise_model

@@ -12,15 +12,19 @@ vals = [5., 1., 3]
 theta = times, vals
 
 _, camera_sample = \
-    make_camera_model(0.1, 0.01, 60, make_gaussian_model(sigmasq=0.01))
+    make_camera_model(0.1, 0.01, make_gaussian_model(sigmasq=0.01))
 
-samples = [camera_sample(theta) for _ in xrange(3)]
+samples = [camera_sample(theta, npr.uniform(), 60) for _ in xrange(3)]
 
 colors = ['b', 'g', 'r']
+plt.figure(figsize=(8,6))
 for color, sample in zip(colors, samples):
     plt.stem(sample, 'k-', markerfmt=color + 'o')
+plt.savefig('frames.png')
 
-plt.figure()
+plt.figure(figsize=(8,6))
 plot_theta(theta)
+plt.savefig('trace.png')
+
 
 plt.show()
