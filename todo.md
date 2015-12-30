@@ -1,6 +1,7 @@
 TODO immediately
 - [x] fix bug in u proposal (T_cycle scaling)
-- [ ] mh sampling
+- [x] mh sampling
+- [ ] plotting in synth_mh may be off by one cycle, improve ploting!
 - [ ] hmc / nuts sampling (sampyl should work)
 
 TODO someday
