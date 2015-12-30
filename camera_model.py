@@ -9,6 +9,8 @@ from operator import itemgetter
 from util import make_piecewise, make_indicator_funcs, compose_pieces
 
 
+# TODO remove num_frames, that should come from data (?)
+
 def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
     noise_loglike, noise_sample = noise_model
 
@@ -19,13 +21,13 @@ def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
         return scale * (F(stops) - F(starts))
 
     def loglike(z, theta, u):
-        F = make_cdf(theta)
+        F = make_integrated_theta(theta)
         y = noiseless_measurements(F, u)
         return noise_loglike(y, z)
 
     def sample(theta, u=None):
         u = npr.uniform() if u is None else u
-        F = make_cdf(theta)
+        F = make_integrated_theta(theta)
         y = noiseless_measurements(F, u)
         return noise_sample(y)
 
@@ -34,7 +36,7 @@ def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
 
 ### internals below here!
 
-def make_cdf(theta):
+def make_integrated_theta(theta):
     times, vals = theta
     indicator_funcs = make_indicator_funcs(times)
     value_funcs = make_value_funcs(times, vals)
