@@ -61,7 +61,7 @@ plt.stem(range(1, len(z) + 1), z)
 plt.xlim(0, len(z) + 1)
 
 plt.axes(axs[1])
-for sampled_theta in sampled_thetas[-1::-50]:
+for sampled_theta in sampled_thetas[-1::-25]:
     plot_theta(sampled_theta, num_frames * T_cycle, u, alpha=0.05, color='r')
 
 plt.savefig('plots/inference.png')
