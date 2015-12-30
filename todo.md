@@ -1,7 +1,6 @@
 TODO immediately
 - [ ] mh sampling
 - [ ] hmc / nuts sampling (sampyl should work)
-- [ ] since prior proposals accumulate over time axis, make a single-site proposal
 
 TODO someday
 - [ ] generate loglike automatically using prob prog!
