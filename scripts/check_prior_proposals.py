@@ -10,7 +10,7 @@ theta = sample_prior(1)
 u = npr.uniform()
 x = theta, u
 
-log_q, propose = make_proposal((200., 200.), 100.)
+log_q, propose = make_proposal((200., 200.), 100., 1.)
 new_x = new_theta, new_u = propose((theta, u))
 
 print theta
