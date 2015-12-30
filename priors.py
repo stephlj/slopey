@@ -88,14 +88,18 @@ def make_proposal(theta_proposal_params, u_proposal_params):
     def log_q_theta(new_theta, theta):
         pass  # TODO
 
-    def log_q_u(new_u, u):
-        pass  # TODO
-
     def propose_theta(theta):
         pass  # TODO
 
+    def log_q_u(new_u, u):
+        scale = u_proposal_params
+        alpha, beta = u*scale, (1-u)*scale
+        return beta_log_density(new_u, (alpha, beta))
+
     def propose_u(u):
-        pass  # TODO
+        scale = u_proposal_params
+        alpha, beta = u*scale, (1-u)*scale
+        return beta_sample((alpha, beta))
 
     return log_q, propose
 
