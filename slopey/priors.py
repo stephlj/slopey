@@ -89,7 +89,7 @@ def make_proposal(theta_proposal_params, u_proposal_params):
         new_slopey_times = propose_times(slopey_times)
         new_times = integrate_dwelltimes(new_flat_times, new_slopey_times)
 
-        return new_times, new_vals
+        return np.array(new_times), np.array(new_vals)
 
     def log_q(new_params, params):
         (new_theta, new_u), (theta, u) = new_params, params

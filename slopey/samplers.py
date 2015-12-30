@@ -20,6 +20,7 @@ def run_mh(init_theta, log_p, proposal_distn, N):
     for n in xrange(N):
         new_theta = propose(theta)
         alpha = np.exp(log_acceptance_prob(theta, new_theta))
+        print alpha
         theta = new_theta if flip_coin(alpha) else theta
 
         thetas.append(theta)
