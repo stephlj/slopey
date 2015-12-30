@@ -1,15 +1,23 @@
 from __future__ import division
 import numpy as np
 import numpy.random as npr
-from scipy.special import gammaln
+from scipy.special import gammaln, betaln
 import matplotlib.pyplot as plt
 
-# theta = times, vals
-# if we have k slopey bits, we have k+1 values and 2k times
-# i think we need to assume that the number of slopey bits is known... otherwise
-# we're in RJ MCMC territory, which is okay but not ideal
 
-# TODO should have prior term on u?
+### primitive distributions
+
+def beta_log_density(x, params):
+    alpha, beta = params
+    logprobs = (alpha - 1) * np.log(x) + (beta - 1) * np.log(1-x) \
+        - betaln(alpha, beta)
+    return np.sum(logprobs)
+
+
+def beta_sample(params, size=None):
+    alpha, beta = params
+    return npr.beta(alpha, beta, size=size)
+
 
 def gamma_log_density(x, params):
     alpha, beta = params
@@ -21,6 +29,8 @@ def gamma_sample(params, size=None):
     alpha, beta = params
     return npr.gamma(alpha, 1./beta, size=size)
 
+
+### prior on traces (theta)
 
 def make_prior(level_params, slopey_time_params, flat_time_params):
     def log_prior_density(theta):
@@ -51,6 +61,7 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
 
         return np.cumsum(interleave(flat_times, slopey_times))
 
+    # TODO these should really be factored out as arguments
     logp_dwelltimes = gamma_log_density
     logp_levels = gamma_log_density
     sample_dwelltimes = gamma_sample
@@ -58,6 +69,38 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
 
     return log_prior_density, sample_prior
 
+
+### proposal distributions for MH
+
+# the proposal is over the pair (theta, u)
+
+def make_proposal(theta_proposal_params, u_proposal_params):
+    def log_q(new_params, params):
+        (new_theta, new_u), (theta, u) = new_params, params
+        return log_q_theta(new_theta, theta) + log_q_u(new_u, u)
+
+    def propose(params):
+        theta, u = params
+        new_theta = propose_theta(theta)
+        new_u = propose_u(u)
+        return new_theta, new_u
+
+    def log_q_theta(new_theta, theta):
+        pass  # TODO
+
+    def log_q_u(new_u, u):
+        pass  # TODO
+
+    def propose_theta(theta):
+        pass  # TODO
+
+    def propose_u(u):
+        pass  # TODO
+
+    return log_q, propose
+
+
+### plotting
 
 def plot_theta(theta):
     times, vals = theta
