@@ -47,20 +47,6 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
         vals = sample_levels(level_params, num_slopey_bits + 1)
         return times, vals
 
-    def split_dwelltimes(times):
-        diffs = np.concatenate((times[:1], np.diff(times)))
-        flat_times, slopey_times = diffs[::2], diffs[1::2]
-        return flat_times, slopey_times
-
-    def integrate_dwelltimes(flat_times, slopey_times):
-        def interleave(a, b):
-            out = np.empty((a.size + b.size,), dtype=a.dtype)
-            out[::2] = a
-            out[1::2] = b
-            return out
-
-        return np.cumsum(interleave(flat_times, slopey_times))
-
     # TODO these should really be factored out as arguments
     logp_dwelltimes = gamma_log_density
     logp_levels = gamma_log_density
@@ -72,36 +58,88 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
 
 ### proposal distributions for MH
 
-# the proposal is over the pair (theta, u)
-
 def make_proposal(theta_proposal_params, u_proposal_params):
-    def log_q(new_params, params):
-        (new_theta, new_u), (theta, u) = new_params, params
-        return log_q_theta(new_theta, theta) + log_q_u(new_u, u)
-
     def propose(params):
         theta, u = params
         new_theta = propose_theta(theta)
         new_u = propose_u(u)
         return new_theta, new_u
 
-    def log_q_theta(new_theta, theta):
-        pass  # TODO
+    def propose_u(u):
+        scale = u_proposal_params
+        alpha, beta = u*scale, (1-u)*scale
+        return beta_sample((alpha, beta))
 
     def propose_theta(theta):
-        pass  # TODO
+        times, vals = theta
+        val_scale, time_scale = theta_proposal_params
+
+        def make_proposer(scale):
+            propose_one = lambda x: gamma_sample((x*scale, scale))
+            propose_list = lambda lst: map(propose_one, lst)
+            return propose_list
+
+        propose_vals = make_proposer(val_scale)
+        propose_times = make_proposer(time_scale)
+
+        new_vals = propose_vals(vals)
+
+        flat_times, slopey_times = split_dwelltimes(times)
+        new_flat_times = propose_times(flat_times)
+        new_slopey_times = propse_tmes(slopey_times)
+        new_times = integrate_dwelltimes(new_flat_times, new_slopey_times)
+
+        return new_times, new_vals
+
+    def log_q(new_params, params):
+        (new_theta, new_u), (theta, u) = new_params, params
+        return log_q_theta(new_theta, theta) + log_q_u(new_u, u)
 
     def log_q_u(new_u, u):
         scale = u_proposal_params
         alpha, beta = u*scale, (1-u)*scale
         return beta_log_density(new_u, (alpha, beta))
 
-    def propose_u(u):
-        scale = u_proposal_params
-        alpha, beta = u*scale, (1-u)*scale
-        return beta_sample((alpha, beta))
+    def log_q_theta(new_theta, theta):
+        (new_times, new_vals), (times, vals) = new_theta, theta
+
+        def make_scorer(scale):
+            score_one = lambda x_new, x: gamma_log_density(x_new, (x*scale, scale))
+            score_lists = lambda lst_new, lst: sum(map(score_one, lst_new, lst))
+            return score_lists
+
+        score_vals = make_scorer(val_scale)
+        score_times = make_scorer(time_scale)
+
+        vals_score = score_vals(new_vals, vals)
+
+        flat_times, slopey_times = split_dwelltimes(times)
+        new_flat_times, new_slopey_times = split_times(new_times)
+        flat_score = score_times(new_flat_times, flat_times)
+        slopey_score = score_times(new_slopey_times, slopey_times)
+        times_score = flat_score + slopey_score
+
+        return times_score + vals_score
 
     return log_q, propose
+
+
+### internals
+
+def split_dwelltimes(times):
+    diffs = np.concatenate((times[:1], np.diff(times)))
+    flat_times, slopey_times = diffs[::2], diffs[1::2]
+    return flat_times, slopey_times
+
+
+def integrate_dwelltimes(flat_times, slopey_times):
+    def interleave(a, b):
+        out = np.empty((a.size + b.size,), dtype=a.dtype)
+        out[::2] = a
+        out[1::2] = b
+        return out
+
+    return np.cumsum(interleave(flat_times, slopey_times))
 
 
 ### plotting
