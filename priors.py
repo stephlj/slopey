@@ -33,7 +33,7 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
     def sample_prior(num_slopey_bits):
         flat_times = sample_dwelltimes(flat_time_params, num_slopey_bits)
         slopey_times = sample_dwelltimes(slopey_time_params, num_slopey_bits)
-        times = interleave(flat_times, slopey_times)
+        times = integrate_dwelltimes(flat_times, slopey_times)
         vals = sample_levels(level_params, num_slopey_bits + 1)
         return times, vals
 
@@ -42,11 +42,14 @@ def make_prior(level_params, slopey_time_params, flat_time_params):
         flat_times, slopey_times = diffs[::2], diffs[1::2]
         return flat_times, slopey_times
 
-    def interleave(a, b):
-        out = np.empty((a.size + b.size,), dtype=a.dtype)
-        out[::2] = a
-        out[1::2] = b
-        return out
+    def integrate_dwelltimes(flat_times, slopey_times):
+        def interleave(a, b):
+            out = np.empty((a.size + b.size,), dtype=a.dtype)
+            out[::2] = a
+            out[1::2] = b
+            return out
+
+        return np.cumsum(interleave(flat_times, slopey_times))
 
     logp_dwelltimes = gamma_log_density
     logp_levels = gamma_log_density

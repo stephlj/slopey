@@ -9,26 +9,24 @@ from operator import itemgetter
 from util import make_piecewise, make_indicator_funcs, compose_pieces
 
 
-# TODO remove num_frames, that should come from data z (?)
-
-def make_camera_model(T_cycle, T_blank, num_frames, noise_model):
+def make_camera_model(T_cycle, T_blank, noise_model):
     noise_loglike, noise_sample = noise_model
 
-    def noiseless_measurements(F, u):
+    def noiseless_measurements(F, u, num_frames):
         starts = u + np.arange(0., num_frames * T_cycle, T_cycle)
         stops = starts + T_cycle - T_blank
         scale = 1. / (T_cycle - T_blank)
         return scale * (F(stops) - F(starts))
 
     def loglike(z, theta, u):
+        num_frames = len(z)
         F = make_integrated_theta(theta)
-        y = noiseless_measurements(F, u)
+        y = noiseless_measurements(F, u, num_frames)
         return noise_loglike(y, z)
 
-    def sample(theta, u=None):
-        u = npr.uniform() if u is None else u
+    def sample(theta, u, num_frames):
         F = make_integrated_theta(theta)
-        y = noiseless_measurements(F, u)
+        y = noiseless_measurements(F, u, num_frames)
         return noise_sample(y)
 
     return loglike, sample
