@@ -3,7 +3,8 @@ import numpy as np
 import numpy.random as npr
 import matplotlib.pyplot as plt
 
-from slopey.priors import make_prior, make_proposal, plot_theta
+from slopey.priors import make_prior, make_proposal
+from slopey.plotting import plot_theta
 
 log_prior_density, sample_prior = make_prior((3., 1.), (6., 2.), (12., 2.))
 theta = sample_prior(1)

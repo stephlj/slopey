@@ -4,9 +4,10 @@ import numpy.random as npr
 import matplotlib.pyplot as plt
 
 from slopey.samplers import run_mh
-from slopey.priors import make_prior, make_proposal, plot_theta
+from slopey.priors import make_prior, make_proposal
 from slopey.camera_model import make_camera_model
 from slopey.noise_models import make_gaussian_model
+from slopey.plotting import plot_theta
 
 npr.seed(0)
 
