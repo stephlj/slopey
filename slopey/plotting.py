@@ -2,6 +2,8 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
+# TODO these plots might be off by one cycle
+
 
 def plot_theta(theta, time_max=None, time_offset=0., **plot_kwargs):
     times, vals = theta

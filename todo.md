@@ -1,8 +1,7 @@
 TODO immediately
 - [x] fix bug in u proposal (T_cycle scaling)
 - [x] mh sampling
-- [ ] plotting in synth_mh may be off by one cycle, improve ploting!
-- [ ] geweke tests
+- [x] plotting in synth_mh may be off by one cycle, improve ploting!
 - [ ] gaussian shot noise
 
 TODO embellishment menu
@@ -13,5 +12,6 @@ TODO embellishment menu
 - [ ] think about 'energy ladders' in the prior
 - [ ] think about multiple fast flat bits: is that an HMM again?
 
-TODO probably out of scope
+TODO possibly out of scope / unnecessary
+- [ ] geweke tests
 - [ ] generate loglike automatically using prob prog!
