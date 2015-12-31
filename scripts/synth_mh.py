@@ -17,7 +17,7 @@ T_blank = 0.001
 noise_sigmasq = 1e-1
 
 # set up synthetic trace and frame offset
-times = np.array([2., 2.3])
+times = np.array([1.5, 1.8])
 vals = np.array([3., 1.])
 theta = times, vals
 
@@ -33,7 +33,7 @@ num_frames = int(np.ceil((times[-1] + 1) / T_cycle))
 z = camera_sample(theta, u, num_frames)
 
 # set up prior
-log_prior_density, _ = make_prior((3., 1.), (6., 2.), (12., 2.))
+log_prior_density, _ = make_prior((1., 1./3), (6., 2.), (12., 2.))
 
 # define joint distribution
 def log_p(x):
@@ -67,4 +67,5 @@ for sampled_theta, sampled_u in samples[-1::-50]:
     plot_sample(sampled_theta, sampled_u, color='r', alpha=0.05)
 plot_sample(theta, u, color='k', linestyle='--')
 
+plt.savefig('plots/inference.png')
 plt.show()
