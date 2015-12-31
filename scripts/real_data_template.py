@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from slopey.noise_models import make_gaussian_model
 from slopey.models import model1
-from slopey.priors import plot_theta  # TODO move plotting code elsewhere
+from slopey.plotting import plot_samples
 
 npr.seed(0)  # reproducible
 
@@ -51,20 +51,6 @@ samples = run(num_iterations)
 # discard half of the samples as warm-up (since initialization was random)
 samples = samples[num_iterations//2:]
 
-
-### plotting the results
-
-def plot_sample(theta, u, **kwargs):
-    plot_theta(theta, num_frames * T_cycle, u, **kwargs)
-
-fig, axs = plt.subplots(2,1, figsize=(8,6))
-
-plt.axes(axs[0])
-plt.stem(range(1, len(z) + 1), z)
-plt.xlim(0, len(z) + 1)
-
-plt.axes(axs[1])
-for sampled_theta, sampled_u in samples[-1::-50]:
-    plot_sample(sampled_theta, sampled_u, color='r', alpha=0.05)
-
+# plot the results
+plot_samples(samples, z, T_cycle)
 plt.show()
