@@ -146,7 +146,7 @@ def integrate_dwelltimes(flat_times, slopey_times):
     return np.cumsum(interleave(flat_times, slopey_times))
 
 
-### plotting
+### plotting (temporary)
 
 def plot_theta(theta, time_max=None, time_offset=0., **plot_kwargs):
     times, vals = theta

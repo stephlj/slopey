@@ -31,6 +31,7 @@ camera_loglike, camera_sample = \
 # generate frame data
 num_frames = int(np.ceil((times[-1] + 1) / T_cycle))
 z = camera_sample(theta, u, num_frames)
+np.savetxt('data/example_frames.txt', z)
 
 # set up prior
 log_prior_density, _ = make_prior((1., 1./3), (6., 2.), (12., 2.))
