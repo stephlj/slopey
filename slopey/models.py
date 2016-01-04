@@ -6,7 +6,13 @@ from priors import make_prior, make_proposal
 from camera_model import make_camera_model
 from samplers import run_mh
 
+def ensure_1d(z):
+    z = np.squeeze(z)
+    assert z.ndim == 1
+    return z
+
 def model1(num_slopey, prior_params, camera_params, proposal_params, z):
+    z = ensure_1d(z)
     T_cycle, _, _ = camera_params
 
     # build the model densities, a prior and a likelihood
