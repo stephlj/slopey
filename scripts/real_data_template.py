@@ -14,7 +14,8 @@ npr.seed(0)  # reproducible
 ### load data
 # z = np.loadtxt('data/example_frames.txt')
 # Steph edit to load from mat file instead
-z = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_293_RedFr350to425.mat')
+# z = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_293_RedFr350to425.mat')
+z = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_RedFr400to466.mat')
 z = z['OneRealSlopey'].T
 num_frames = len(z)
 

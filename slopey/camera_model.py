@@ -17,6 +17,7 @@ def make_camera_model(T_cycle, T_blank, noise_model):
         return scale * (F(stops) - F(starts))
 
     def loglike(z, theta, u):
+        assert z.ndim == 1
         num_frames = len(z)
         F = make_integrated_theta(theta)
         y = noiseless_measurements(F, u, num_frames)
