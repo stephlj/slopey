@@ -2,6 +2,7 @@
 
 ## TODO now
 - [ ] red and green channels separate (camera model: same frames, different gains)
+- [ ] learn the noise
 - [ ] gaussian shot noise
 - [ ] animation
 
