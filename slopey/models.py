@@ -6,35 +6,36 @@ from priors import make_prior, make_proposal
 from camera_model import make_camera_model
 from samplers import run_mh
 
-def ensure_1d(z):
+def ensure_2d(z):
     z = np.squeeze(z)
-    assert z.ndim == 1
+    assert z.ndim == 2 and z.shape[1] == 2
     return z
 
 def model1(num_slopey, prior_params, camera_params, proposal_params, z):
-    z = ensure_1d(z)
+    z = ensure_2d(z)
     T_cycle, _, _ = camera_params
 
     # build the model densities, a prior and a likelihood
-    log_prior_density, prior_sample = make_prior(*prior_params)
-    camera_loglike, _ = make_camera_model(*camera_params)
+    log_prior_density, prior_sample = make_prior(prior_params)
+    camera_loglike, _ = make_camera_model(camera_params)
 
     # define the joint distribution as the prior times the likelihood
     def log_p(x):
-        theta, u = x
-        return camera_loglike(z, theta, u) + log_prior_density(theta)
+        theta, u, ch2_transform = x
+        return camera_loglike(z, theta, u, ch2_transform) \
+            + log_prior_density(theta, ch2_transform)
 
     # set up inference
-    proposal_distn = make_proposal(*proposal_params)
+    proposal_distn = make_proposal(proposal_params, T_cycle)
 
     # make a callback to print how often proposals are accepted
     accepts = []
     callback = lambda alpha, theta, accept: accepts.append(accept)
 
     # make an initial guess by sampling from the prior
-    theta_init = prior_sample(num_slopey)
+    theta_init, ch2_transform_init = prior_sample(num_slopey)
     u_init = npr.uniform() * T_cycle
-    x_init = theta_init, u_init
+    x_init = theta_init, u_init, ch2_transform_init
 
     # make a runner function
     samples = [x_init]

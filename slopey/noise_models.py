@@ -2,12 +2,13 @@ from __future__ import division
 import numpy as np
 import numpy.random as npr
 
-def make_poisson_model(gain):
+
+def make_poisson_model(lambda_scale):
     def sample(y):
-        return npr.poisson(y*gain)
+        return npr.poisson(y * lambda_scale)
 
     def loglike(y, z):
-        lmbda = y * gain
+        lmbda = y * lambda_scale
         return np.sum(-lmbda + z*np.log(lmbda) - gammaln(z+1))
 
     return loglike, sample

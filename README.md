@@ -1,11 +1,14 @@
 ![inference](plots/inference.png)
 
 ## TODO now
+- [x] test and debug >1 slopey bit version
 - [ ] red and green channels separate (camera model: same frames, different gains)
 - [ ] set prior based on old HMM analysis? (Output of old HMM is in *_Results.mat data files)
-- [ ] learn the noise
-- [ ] gaussian shot noise
+- [ ] rename 'theta' to 'x', use 'theta' to refer to (x, frame_offset, ch2_transform_params)
+- [ ] slopey duration histograms
 - [ ] animation
+- [ ] gaussian shot noise
+- [ ] learn the noise parameters
 
 ## embellishment menu
 - [ ] infer number of slopey bits (RJ MCMC)

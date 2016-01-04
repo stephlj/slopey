@@ -32,97 +32,136 @@ def gamma_sample(params, size=None):
 
 ### prior on traces (theta)
 
-def make_prior(level_params, slopey_time_params, flat_time_params):
-    def log_prior_density(theta):
-        times, vals = theta
-        flat_times, slopey_times = split_dwelltimes(times)
-        return logp_levels(vals, level_params) \
-            + logp_dwelltimes(slopey_times, slopey_time_params) \
-            + logp_dwelltimes(flat_times, flat_time_params)
+def make_prior(prior_params):
+    theta_params, ch2_transform_params = prior_params
+
+    def log_prior_density(theta, ch2_transform):
+        def logp_theta(theta):
+            level_params, slopey_time_params, flat_time_params = theta_params
+            logp_dwelltimes = gamma_log_density
+            logp_levels = gamma_log_density
+
+            times, vals = theta
+            flat_times, slopey_times = split_dwelltimes(times)
+            log_density_total = logp_levels(vals, level_params) \
+                + logp_dwelltimes(slopey_times, slopey_time_params) \
+                + logp_dwelltimes(flat_times, flat_time_params)
+
+            return log_density_total
+
+        def logp_ch2_transform(ch2_transform):
+            a_params, b_params = ch2_transform_params
+            a, b = ch2_transform
+            return gamma_log_density(a, a_params) + gamma_log_density(b, b_params)
+
+        return logp_theta(theta) + logp_ch2_transform(ch2_transform)
 
     def sample_prior(num_slopey_bits):
-        flat_times = sample_dwelltimes(flat_time_params, num_slopey_bits)
-        slopey_times = sample_dwelltimes(slopey_time_params, num_slopey_bits)
-        times = integrate_dwelltimes(flat_times, slopey_times)
-        vals = sample_levels(level_params, num_slopey_bits + 1)
-        return times, vals
+        def sample_theta(theta_params):
+            level_params, slopey_time_params, flat_time_params = theta_params
 
-    # TODO these should really be factored out as arguments
-    logp_dwelltimes = gamma_log_density
-    logp_levels = gamma_log_density
-    sample_dwelltimes = gamma_sample
-    sample_levels = gamma_sample
+            sample_dwelltimes = gamma_sample
+            sample_levels = gamma_sample
+
+            flat_times = sample_dwelltimes(flat_time_params, num_slopey_bits)
+            slopey_times = sample_dwelltimes(slopey_time_params, num_slopey_bits)
+            times = integrate_dwelltimes(flat_times, slopey_times)
+            vals = sample_levels(level_params, num_slopey_bits + 1)
+
+            return times, vals
+
+        def sample_ch2_transform(ch2_transform_params):
+            a_params, b_params = ch2_transform_params
+            return gamma_sample(a_params), gamma_sample(b_params)
+
+        return sample_theta(theta_params), sample_ch2_transform(ch2_transform_params)
 
     return log_prior_density, sample_prior
 
 
 ### prior-based proposal distributions for MH
 
-def make_proposal(theta_proposal_params, u_proposal_params, T_cycle):
+def make_proposal(proposal_params, T_cycle):
+    theta_proposal_params, u_proposal_params, ch2_proposal_params = proposal_params
+
     def propose(params):
-        theta, u = params
-        new_theta = propose_theta(theta)
-        new_u = propose_u(u)
-        return new_theta, new_u
+        theta, u, ch2_transform = params
 
-    def propose_u(u):
-        scale = u_proposal_params
-        frac = u / T_cycle
-        alpha, beta = frac*scale, (1-frac)*scale
-        return T_cycle * beta_sample((alpha, beta))
 
-    def propose_theta(theta):
-        def make_proposer(scale):
-            propose_one = lambda x: gamma_sample((x*scale, scale))
-            propose_list = lambda lst: map(propose_one, lst)
-            return propose_list
+        def propose_ch2_transform(ch2_transform):
+            scale = ch2_proposal_params
+            gamma_proposal = lambda x: gamma_sample((x*scale, scale))
 
-        val_scale, time_scale = theta_proposal_params
-        propose_vals = make_proposer(val_scale)
-        propose_times = make_proposer(time_scale)
+            a, b = ch2_transform
+            return gamma_proposal(a), max(gamma_proposal(b), 1e-8)
 
-        times, vals = theta
+        def propose_u(u):
+            scale = u_proposal_params
+            frac = u / T_cycle
+            alpha, beta = frac*scale, (1-frac)*scale
+            return T_cycle * beta_sample((alpha, beta))
 
-        new_vals = propose_vals(vals)
+        def propose_theta(theta):
+            def make_proposer(scale):
+                propose_one = lambda x: gamma_sample((x*scale, scale))
+                propose_list = lambda lst: map(propose_one, lst)
+                return propose_list
 
-        flat_times, slopey_times = split_dwelltimes(times)
-        new_flat_times = propose_times(flat_times)
-        new_slopey_times = propose_times(slopey_times)
-        new_times = integrate_dwelltimes(new_flat_times, new_slopey_times)
+            val_scale, time_scale = theta_proposal_params
+            propose_vals = make_proposer(val_scale)
+            propose_times = make_proposer(time_scale)
 
-        return np.array(new_times), np.array(new_vals)
+            times, vals = theta
+
+            new_vals = propose_vals(vals)
+
+            flat_times, slopey_times = split_dwelltimes(times)
+            new_flat_times = propose_times(flat_times)
+            new_slopey_times = propose_times(slopey_times)
+            new_times = integrate_dwelltimes(new_flat_times, new_slopey_times)
+
+            return np.array(new_times), np.array(new_vals)
+
+        return propose_theta(theta), propose_u(u), propose_ch2_transform(ch2_transform)
 
     def log_q(new_params, params):
-        (new_theta, new_u), (theta, u) = new_params, params
-        return log_q_theta(new_theta, theta) + log_q_u(new_u, u)
+        (new_theta, new_u, new_ch2), (theta, u, ch2) = new_params, params
 
-    def log_q_u(new_u, u):
-        scale = u_proposal_params
-        new_frac, frac = new_u / T_cycle, u / T_cycle
-        alpha, beta = frac*scale, (1-frac)*scale
-        return beta_log_density(new_frac, (alpha, beta)) - np.log(T_cycle)
+        def log_q_ch2(new_ch2, ch2):
+            scale = ch2_proposal_params
+            (new_a, new_b), (a, b) = new_ch2, ch2
+            return gamma_log_density(new_a, (scale*a, scale)) \
+                + gamma_log_density(new_b, (scale*b, scale))
 
-    def log_q_theta(new_theta, theta):
-        def make_scorer(scale):
-            score_one = lambda x_new, x: gamma_log_density(x_new, (x*scale, scale))
-            score_lists = lambda lst_new, lst: sum(map(score_one, lst_new, lst))
-            return score_lists
+        def log_q_u(new_u, u):
+            scale = u_proposal_params
+            new_frac, frac = new_u / T_cycle, u / T_cycle
+            alpha, beta = frac*scale, (1-frac)*scale
+            return beta_log_density(new_frac, (alpha, beta)) - np.log(T_cycle)
 
-        val_scale, time_scale = theta_proposal_params
-        score_vals = make_scorer(val_scale)
-        score_times = make_scorer(time_scale)
+        def log_q_theta(new_theta, theta):
+            def make_scorer(scale):
+                score_one = lambda x_new, x: gamma_log_density(x_new, (x*scale, scale))
+                score_lists = lambda lst_new, lst: sum(map(score_one, lst_new, lst))
+                return score_lists
 
-        (new_times, new_vals), (times, vals) = new_theta, theta
+            val_scale, time_scale = theta_proposal_params
+            score_vals = make_scorer(val_scale)
+            score_times = make_scorer(time_scale)
 
-        vals_score = score_vals(new_vals, vals)
+            (new_times, new_vals), (times, vals) = new_theta, theta
 
-        flat_times, slopey_times = split_dwelltimes(times)
-        new_flat_times, new_slopey_times = split_dwelltimes(new_times)
-        flat_score = score_times(new_flat_times, flat_times)
-        slopey_score = score_times(new_slopey_times, slopey_times)
-        times_score = flat_score + slopey_score
+            vals_score = score_vals(new_vals, vals)
 
-        return times_score + vals_score
+            flat_times, slopey_times = split_dwelltimes(times)
+            new_flat_times, new_slopey_times = split_dwelltimes(new_times)
+            flat_score = score_times(new_flat_times, flat_times)
+            slopey_score = score_times(new_slopey_times, slopey_times)
+            times_score = flat_score + slopey_score
+
+            return times_score + vals_score
+
+        return log_q_theta(new_theta, theta) + log_q_u(new_u, u) + log_q_ch2(new_ch2, ch2)
 
     return log_q, propose
 
