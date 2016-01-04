@@ -1,9 +1,7 @@
 ![inference](plots/inference.png)
 
 ## TODO now
-- [x] fix bug in u proposal (T_cycle scaling)
-- [x] mh sampling
-- [x] plotting in synth_mh may be off by one cycle, improve ploting!
+- [ ] red and green channels separate (camera model: same frames, different gains)
 - [ ] gaussian shot noise
 - [ ] animation
 
