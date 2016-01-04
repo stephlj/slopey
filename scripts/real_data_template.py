@@ -25,7 +25,7 @@ num_frames = len(z)
 ### setting parameters
 
 # set how many slopey bits are expected
-num_slopey = 1
+num_slopey = 2
 
 # set number of iterations of MH
 num_iterations = 5000

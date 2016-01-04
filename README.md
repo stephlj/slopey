@@ -2,6 +2,7 @@
 
 ## TODO now
 - [ ] red and green channels separate (camera model: same frames, different gains)
+- [ ] set prior based on old HMM analysis? (Output of old HMM is in *_Results.mat data files)
 - [ ] learn the noise
 - [ ] gaussian shot noise
 - [ ] animation
