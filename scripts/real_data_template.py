@@ -18,7 +18,7 @@ npr.seed(0)  # reproducible
 #z = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_RedFr400to466.mat')
 #z = z['OneRealSlopey'].ravel()
 z = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_115_Results.mat')
-z = z['unsmoothedRedI'].ravel()
+z = z['unsmoothedRedI'].ravel()[250:]
 num_frames = len(z)
 
 
@@ -28,7 +28,7 @@ num_frames = len(z)
 num_slopey = 2
 
 # set number of iterations of MH
-num_iterations = 5000
+num_iterations = 10000
 
 # set camera model parameters
 T_cycle = 0.036

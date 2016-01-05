@@ -16,8 +16,8 @@ def plot_theta(theta, time_max=None, time_offset=0., **plot_kwargs):
     xs, ys = get_points(times, vals)
 
     plt.plot(xs, ys, **plot_kwargs)
-    plt.plot(times[::2], vals[::2], 'gx', **plot_kwargs)
-    plt.plot(times[1::2], vals[1::2], 'bx', **plot_kwargs)
+    plt.plot(xs[1::2], ys[1::2], 'gx', alpha=0.1)
+    plt.plot(xs[2::2], ys[2::2], 'bx', alpha=0.1)
     plt.ylim(0., np.max(ys) + 1.)
     plt.xlim(0., time_max - time_offset)
 
