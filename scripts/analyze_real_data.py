@@ -37,8 +37,10 @@ camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
 # set prior hyperparameters
 intensity_hypers = 1., 1./3  # exponential prior with mean of alpha/beta = 3
 
-slopey_time_hypers = 2., 4.  # gamma prior peaked near mean of alpha/beta = 1./2
-flat_time_hypers = 3., 2.    # gamma prior peaked near mean of alpha/beta = 3./2
+# slopey_time_hypers = 2., 4.  # gamma prior peaked near mean of alpha/beta = 1./2
+slopey_time_hypers = 1., 3. # exponential prior with mean of alpha/beta = 1/3 seconds
+#flat_time_hypers = 3., 2.    # gamma prior peaked near mean of alpha/beta = 3./2
+flat_time_hypers = 1., 1./10 # exponential prior with mean of alpha/beta seconds
 
 trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
 
