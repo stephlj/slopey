@@ -33,7 +33,14 @@ def plot_samples(samples, z, T_cycle):
     num_frames = len(z)
     zR, zG = z.T
 
-    def plot_sample(sample, **kwargs):
+    def plot_frames(seq, colorstr):
+        ns = range(1, len(seq) + 1)
+        plt.plot(ns, seq, colorstr + 'o', markersize=3)
+
+        plt.xlabel('frame number')
+        plt.ylabel('measured intensity')
+
+    def plot_trace_sample(sample, **kwargs):
         x, u, ch2_transform = sample
         time_max = T_cycle * num_frames
 
@@ -50,11 +57,26 @@ def plot_samples(samples, z, T_cycle):
         plot_trace(flip_to_ch2(x), time_max, u, color='g', linestyle=':', **kwargs)
         plot_trace(transform_to_measured_ch2(x), time_max, u, color='g', **kwargs)
 
-    def plot_frames(seq, colorstr):
-        ns = range(1, len(seq) + 1)
-        plt.plot(ns, seq, colorstr + 'o', markersize=3)
+        plt.xlabel('time (sec)')
+        plt.ylabel('inferred latent intensity')
 
-    fig, axs = plt.subplots(2,1, figsize=(8,6))
+    def plot_duration_samples(samples):
+        from scipy.stats import gaussian_kde
+
+        def get_slopey_durations(sample):
+            x, u, ch2_transform = sample
+            times, vals = x
+            return np.diff(times)[::2]
+
+        sampled_durations = [d for sample in samples for d in get_slopey_durations(sample)]
+        density = gaussian_kde(sampled_durations)
+        t = np.linspace(0, 4, 250)
+        plt.plot(t, density(t))
+
+        plt.xlabel('inferred slopey bit durations (seconds)')
+        plt.ylabel('probability density')
+
+    fig, axs = plt.subplots(3,1, figsize=(8,9))
 
     plt.axes(axs[0])
     plot_frames(zR, 'r')
@@ -64,5 +86,8 @@ def plot_samples(samples, z, T_cycle):
 
     plt.axes(axs[1])
     for sample in samples[-1::-50]:
-        plot_sample(sample, alpha=0.05)
+        plot_trace_sample(sample, alpha=0.05)
     plt.ylim(frames_ylim)
+
+    plt.axes(axs[2])
+    plot_duration_samples(samples[-1::-50])

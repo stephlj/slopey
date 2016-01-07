@@ -5,7 +5,7 @@
 - [x] red and green channels separate
 - [x] rename 'theta' to 'x', use 'theta' to refer to the tuple
   (x, frame_offset, ch2_transform_params)
-- [ ] slopey duration histograms
+- [x] slopey duration histograms
 - [ ] animation
 - [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)
 - [ ] gaussian shot noise
