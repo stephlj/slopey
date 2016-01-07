@@ -6,12 +6,13 @@
 - [x] rename 'theta' to 'x', use 'theta' to refer to the tuple
   (x, frame_offset, ch2_transform_params)
 - [x] slopey duration histograms
-- [ ] animation
+- [ ] animation <-Steph wants to move to embellishments
 - [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)
 - [ ] gaussian shot noise
 - [ ] learn the noise parameters
 
 ## embellishment menu
+- animation
 - infer number of slopey bits (RJ MCMC)
 - positive probability of instantaneous jumps (just make slopey duration
   density have a delta at zero)

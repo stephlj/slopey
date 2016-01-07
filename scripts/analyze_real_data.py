@@ -12,7 +12,7 @@ npr.seed(0)  # reproducible
 
 
 ### load data
-datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_Results.mat')
+datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_320_Results.mat')
 zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
 z = np.hstack((zR[:,None], zG[:,None]))[:1000]
@@ -22,7 +22,7 @@ z = np.hstack((zR[:,None], zG[:,None]))[:1000]
 
 # set how many slopey bits are expected
 # For now: get this info from the old HMM analysis
-num_slopey = 1
+num_slopey = 2
 # num_slopey = len(datadict['model_durations'].ravel())-1
 
 # set number of iterations of MH
