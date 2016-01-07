@@ -28,17 +28,17 @@ def make_camera_model(camera_params):
         return noise_sample(y_2ch)
 
     def noiseless_measurements(F, u, num_frames):
-        starts = u + np.arange(0., num_frames * T_cycle, T_cycle)
+        starts = u + np.linspace(0, num_frames * T_cycle, num_frames, endpoint=False)
         stops = starts + T_cycle - T_blank
         return (F(stops) - F(starts)) / (T_cycle - T_blank)  # each box has unit area
 
     def add_second_channel(y1, x, ch2_transform_params):
         a, b = ch2_transform_params
-        a, b = a, T_cycle * b  # make parameterization invariant to T_cycle
+        b = (T_cycle - T_blank) * b  # make affine reparameterization invariant
 
         def flip(y):
             times, vals = x
-            return np.max(vals) - y
+            return np.max(vals) - y + np.min(vals)
 
         y2 = a * flip(y1) + b
         return np.hstack((y1[:,None], y2[:,None]))

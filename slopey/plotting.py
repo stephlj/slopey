@@ -37,14 +37,18 @@ def plot_samples(samples, z, T_cycle):
         x, u, ch2_transform = sample
         time_max = T_cycle * num_frames
 
-        def construct_ch2(x):
+        def flip_to_ch2(x):
             times, vals = x
+            return times, np.max(vals) - vals + np.min(vals)
+
+        def transform_to_measured_ch2(x):
             a, b = ch2_transform
-            new_vals = a * (np.max(vals) - vals) + b
-            return times, new_vals
+            times, vals = flip_to_ch2(x)
+            return times, a * vals + b
 
         plot_trace(x, time_max, u, color='r', **kwargs)
-        plot_trace(construct_ch2(x), time_max, u, color='g', **kwargs)
+        plot_trace(flip_to_ch2(x), time_max, u, color='g', linestyle=':', **kwargs)
+        plot_trace(transform_to_measured_ch2(x), time_max, u, color='g', **kwargs)
 
     def plot_frames(seq, colorstr):
         ns = range(1, len(seq) + 1)

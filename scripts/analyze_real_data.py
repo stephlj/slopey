@@ -15,7 +15,7 @@ npr.seed(0)  # reproducible
 datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_Results.mat')
 zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
-z = np.hstack((zR[:,None], zG[:,None]))
+z = np.hstack((zR[:,None], zG[:,None]))[:1000]
 
 
 ### setting parameters
@@ -42,8 +42,8 @@ flat_time_hypers = 3., 2.    # gamma prior peaked near mean of alpha/beta = 3./2
 
 trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
 
-ch2_transform_a_hypers = 5., 5.
-ch2_transform_b_hypers = 1., 20.
+ch2_transform_a_hypers = 3., 3.
+ch2_transform_b_hypers = 1., 5.
 ch2_transform_hypers = ch2_transform_a_hypers, ch2_transform_b_hypers
 
 prior_params = trace_params, ch2_transform_hypers
