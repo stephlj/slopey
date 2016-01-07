@@ -12,7 +12,7 @@ npr.seed(0)  # reproducible
 
 
 ### load data
-datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_320_Results.mat')
+datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_Results.mat')
 zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
 z = np.hstack((zR[:,None], zG[:,None]))[:1000]
@@ -37,10 +37,10 @@ camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
 # set prior hyperparameters
 intensity_hypers = 1., 1./3  # exponential prior with mean of alpha/beta = 3
 
-# slopey_time_hypers = 2., 4.  # gamma prior peaked near mean of alpha/beta = 1./2
-slopey_time_hypers = 1., 3. # exponential prior with mean of alpha/beta = 1/3 seconds
-#flat_time_hypers = 3., 2.    # gamma prior peaked near mean of alpha/beta = 3./2
-flat_time_hypers = 1., 1./10 # exponential prior with mean of alpha/beta seconds
+slopey_time_hypers = 2., 4.  # gamma prior peaked near mean of alpha/beta = 1./2
+# slopey_time_hypers = 1., 3. # exponential prior with mean of alpha/beta = 1/3 seconds
+flat_time_hypers = 3., 2.    # gamma prior peaked near mean of alpha/beta = 3./2
+# flat_time_hypers = 1., 1./10 # exponential prior with mean of alpha/beta seconds
 
 trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
 
