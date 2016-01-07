@@ -2,24 +2,24 @@
 
 ## TODO now
 - [x] test and debug >1 slopey bit version
-- [ ] red and green channels separate (camera model: same frames, different gains)
-- [ ] set prior based on old HMM analysis? (Output of old HMM is in *_Results.mat data files)
+- [x] red and green channels separate
 - [ ] rename 'theta' to 'x', use 'theta' to refer to (x, frame_offset, ch2_transform_params)
 - [ ] slopey duration histograms
 - [ ] animation
+- [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)
 - [ ] gaussian shot noise
 - [ ] learn the noise parameters
 
 ## embellishment menu
-- [ ] infer number of slopey bits (RJ MCMC)
-- [ ] positive probability of instantaneous jumps (just make slopey duration
+- infer number of slopey bits (RJ MCMC)
+- positive probability of instantaneous jumps (just make slopey duration
   density have a delta at zero)
-- [ ] hmc / nuts sampling (sampyl could work, only necessary with more
+- hmc / nuts sampling (sampyl could work, only necessary with more
   dimensions)
-- [ ] reuse of energy levels (just sample energy levels ahead of time, add
+- reuse of energy levels (just sample energy levels ahead of time, add
   sequential structure)
-- [ ] think about 'energy ladders' in the prior
-- [ ] think about multiple fast flat bits: is that an HMM again?
+- think about 'energy ladders' in the prior
+- think about multiple fast flat bits: is that an HMM again?
 
 ## ideas possibly out of scope / unnecessary
 - [ ] geweke tests
