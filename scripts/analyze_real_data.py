@@ -40,13 +40,13 @@ intensity_hypers = 1., 1./3  # exponential prior with mean of alpha/beta = 3
 slopey_time_hypers = 2., 4.  # gamma prior peaked near mean of alpha/beta = 1./2
 flat_time_hypers = 3., 2.    # gamma prior peaked near mean of alpha/beta = 3./2
 
-theta_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
+trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
 
 ch2_transform_a_hypers = 5., 5.
 ch2_transform_b_hypers = 1., 20.
 ch2_transform_hypers = ch2_transform_a_hypers, ch2_transform_b_hypers
 
-prior_params = theta_params, ch2_transform_hypers
+prior_params = trace_params, ch2_transform_hypers
 
 # set proposal distribution scale parameters
 # (tune so proposals are acceptedl ~30% of the time)

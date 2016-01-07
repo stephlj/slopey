@@ -3,7 +3,8 @@
 ## TODO now
 - [x] test and debug >1 slopey bit version
 - [x] red and green channels separate
-- [ ] rename 'theta' to 'x', use 'theta' to refer to (x, frame_offset, ch2_transform_params)
+- [x] rename 'theta' to 'x', use 'theta' to refer to the tuple
+  (x, frame_offset, ch2_transform_params)
 - [ ] slopey duration histograms
 - [ ] animation
 - [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)

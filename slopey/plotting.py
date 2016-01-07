@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 # TODO these plots might be off by one cycle
 
 
-def plot_theta(theta, time_max=None, time_offset=0.,
+def plot_trace(x, time_max=None, time_offset=0.,
                mark_changepoints=True, **plot_kwargs):
-    times, vals = theta
+    times, vals = x
     time_max = time_max if time_max else times[-1] + 1
 
     def get_points(times, vals):
@@ -16,7 +16,7 @@ def plot_theta(theta, time_max=None, time_offset=0.,
 
     xs, ys = get_points(times, vals)
 
-    # plot theta line
+    # plot x line
     plt.plot(xs, ys, **plot_kwargs)
 
     # plot starts and stops with x's
@@ -33,17 +33,18 @@ def plot_samples(samples, z, T_cycle):
     num_frames = len(z)
     zR, zG = z.T
 
-    def plot_sample(theta, u, ch2_transform, **kwargs):
+    def plot_sample(sample, **kwargs):
+        x, u, ch2_transform = sample
         time_max = T_cycle * num_frames
 
-        def construct_ch2(theta):
-            times, vals = theta
+        def construct_ch2(x):
+            times, vals = x
             a, b = ch2_transform
             new_vals = a * (np.max(vals) - vals) + b
             return times, new_vals
 
-        plot_theta(theta, time_max, u, color='r', **kwargs)
-        plot_theta(construct_ch2(theta), time_max, u, color='g', **kwargs)
+        plot_trace(x, time_max, u, color='r', **kwargs)
+        plot_trace(construct_ch2(x), time_max, u, color='g', **kwargs)
 
     def plot_frames(seq, colorstr):
         ns = range(1, len(seq) + 1)
@@ -58,6 +59,6 @@ def plot_samples(samples, z, T_cycle):
     frames_ylim = plt.ylim()
 
     plt.axes(axs[1])
-    for sampled_theta, sampled_u, ch2_transform in samples[-1::-50]:
-        plot_sample(sampled_theta, sampled_u, ch2_transform, alpha=0.05)
+    for sample in samples[-1::-50]:
+        plot_sample(sample, alpha=0.05)
     plt.ylim(frames_ylim)

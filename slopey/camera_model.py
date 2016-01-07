@@ -11,18 +11,20 @@ def make_camera_model(camera_params):
     T_cycle, T_blank, noise_model = camera_params
     noise_loglike, noise_sample = noise_model
 
-    def loglike(z, theta, u, ch2_transform_params):
+    def loglike(z, theta):
+        x, u, ch2_transform_params = theta
         assert z.ndim == 2 and z.shape[1] == 2
         num_frames = z.shape[0]
-        F = make_integrated_theta(theta)
+        F = make_integrated_x(x)
         y = noiseless_measurements(F, u, num_frames)
-        y_2ch = add_second_channel(y, theta, ch2_transform_params)
+        y_2ch = add_second_channel(y, x, ch2_transform_params)
         return noise_loglike(y_2ch, z)
 
-    def sample(theta, u, ch2_transform_params, num_frames):
-        F = make_integrated_theta(theta)
+    def sample(theta, num_frames):
+        x, u, ch2_transform_params = theta
+        F = make_integrated_x(x)
         y = noiseless_measurements(F, u, num_frames)
-        y_2ch = add_second_channel(y, theta, ch2_transform_params)
+        y_2ch = add_second_channel(y, x, ch2_transform_params)
         return noise_sample(y_2ch)
 
     def noiseless_measurements(F, u, num_frames):
@@ -30,12 +32,12 @@ def make_camera_model(camera_params):
         stops = starts + T_cycle - T_blank
         return (F(stops) - F(starts)) / (T_cycle - T_blank)  # each box has unit area
 
-    def add_second_channel(y1, theta, ch2_transform_params):
+    def add_second_channel(y1, x, ch2_transform_params):
         a, b = ch2_transform_params
         a, b = a, T_cycle * b  # make parameterization invariant to T_cycle
 
         def flip(y):
-            times, vals = theta
+            times, vals = x
             return np.max(vals) - y
 
         y2 = a * flip(y1) + b
@@ -46,8 +48,8 @@ def make_camera_model(camera_params):
 
 ### internals below here!
 
-def make_integrated_theta(theta):
-    times, vals = theta
+def make_integrated_x(x):
+    times, vals = x
     indicator_funcs = make_indicator_funcs(times)
     value_funcs = make_value_funcs(times, vals)
     return make_piecewise(indicator_funcs, value_funcs)

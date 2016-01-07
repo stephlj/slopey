@@ -20,10 +20,8 @@ def model1(num_slopey, prior_params, camera_params, proposal_params, z):
     camera_loglike, _ = make_camera_model(camera_params)
 
     # define the joint distribution as the prior times the likelihood
-    def log_p(x):
-        theta, u, ch2_transform = x
-        return camera_loglike(z, theta, u, ch2_transform) \
-            + log_prior_density(theta, ch2_transform)
+    def log_p(theta):
+        return camera_loglike(z, theta) + log_prior_density(theta)
 
     # set up inference
     proposal_distn = make_proposal(proposal_params, T_cycle)
@@ -33,12 +31,10 @@ def model1(num_slopey, prior_params, camera_params, proposal_params, z):
     callback = lambda alpha, theta, accept: accepts.append(accept)
 
     # make an initial guess by sampling from the prior
-    theta_init, ch2_transform_init = prior_sample(num_slopey)
-    u_init = npr.uniform() * T_cycle
-    x_init = theta_init, u_init, ch2_transform_init
+    theta_init = prior_sample(num_slopey, T_cycle)
 
     # make a runner function
-    samples = [x_init]
+    samples = [theta_init]
     def run(num_iter):
         new_samples = run_mh(samples[-1], log_p, proposal_distn, num_iter, callback)
         samples.extend(new_samples)
