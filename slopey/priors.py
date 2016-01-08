@@ -17,7 +17,7 @@ def beta_log_density(x, params):
 
 def beta_sample(params, size=None):
     alpha, beta = params
-    return npr.beta(alpha, beta, size=size)
+    return np.clip(npr.beta(alpha, beta, size=size), 1e-6, 1. - 1e-6)
 
 
 def gamma_log_density(x, params):
@@ -28,7 +28,7 @@ def gamma_log_density(x, params):
 
 def gamma_sample(params, size=None):
     alpha, beta = params
-    return npr.gamma(alpha, 1./beta, size=size)
+    return np.maximum(1e-6, npr.gamma(alpha, 1./beta, size=size))
 
 
 ### prior on trace parameters theta = (x, u, ch2_transform)
@@ -99,7 +99,7 @@ def make_proposal(proposal_params, T_cycle):
             gamma_proposal = lambda x: gamma_sample((x*scale, scale))
 
             a, b = ch2_transform
-            return gamma_proposal(a), max(gamma_proposal(b), 1e-8)
+            return gamma_proposal(a), gamma_proposal(b)
 
         def propose_u(u):
             scale = u_proposal_params
