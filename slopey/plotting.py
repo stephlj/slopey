@@ -29,7 +29,7 @@ def plot_trace(x, time_max=None, time_offset=0.,
     plt.xlim(0., time_max - time_offset)
 
 
-def plot_samples(samples, z, T_cycle):
+def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
     num_frames = len(z)
     zR, zG = z.T
 
@@ -84,10 +84,12 @@ def plot_samples(samples, z, T_cycle):
     plt.xlim(0, num_frames + 1)
     frames_ylim = plt.ylim()
 
+    use_samples = samples[-1:warmup:-use_every_k_samples]
+
     plt.axes(axs[1])
-    for sample in samples[-1::-50]:
+    for sample in use_samples:
         plot_trace_sample(sample, alpha=0.05)
     plt.ylim(frames_ylim)
 
     plt.axes(axs[2])
-    plot_duration_samples(samples[-1::-50])
+    plot_duration_samples(use_samples)

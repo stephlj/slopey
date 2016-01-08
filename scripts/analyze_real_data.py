@@ -27,7 +27,7 @@ num_slopey = 2
 # num_slopey = len(datadict['model_durations'].ravel())-1
 
 # set number of iterations of MH
-num_iterations = 5000
+num_iterations = 7500
 
 # set camera model parameters
 T_cycle = 0.036
@@ -38,9 +38,7 @@ camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
 # set prior hyperparameters
 intensity_hypers = 1., 1./3  # exponential prior with mean of alpha/beta = 3
 
-slopey_time_hypers = 2., 4.
-# slopey_time_hypers = 1., 3.
-# flat_time_hypers = 3., 2.
+slopey_time_hypers = 1., 3.
 flat_time_hypers = 1., 1./5.
 
 trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
@@ -68,5 +66,5 @@ samples = run(num_iterations)
 samples = samples[num_iterations//2:]
 
 # plot the results
-plot_samples(samples, z, T_cycle)
+plot_samples(samples, z, T_cycle, warmup=1000)
 plt.show()
