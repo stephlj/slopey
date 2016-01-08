@@ -4,6 +4,7 @@ import numpy.random as npr
 from scipy.special import gammaln, betaln
 import matplotlib.pyplot as plt
 
+np.seterr(divide='raise')
 
 ### primitive distributions
 
