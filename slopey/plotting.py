@@ -29,16 +29,17 @@ def plot_trace(x, time_max=None, time_offset=0.,
     plt.xlim(0., time_max - time_offset)
 
 
+def plot_frames(seq, colorstr):
+    ns = range(1, len(seq) + 1)
+    plt.plot(ns, seq, colorstr + 'o', markersize=3)
+
+    plt.xlabel('frame number')
+    plt.ylabel('measured intensity')
+
+
 def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
     num_frames = len(z)
     zR, zG = z.T
-
-    def plot_frames(seq, colorstr):
-        ns = range(1, len(seq) + 1)
-        plt.plot(ns, seq, colorstr + 'o', markersize=3)
-
-        plt.xlabel('frame number')
-        plt.ylabel('measured intensity')
 
     def plot_trace_sample(sample, **kwargs):
         x, u, ch2_transform = sample
@@ -93,3 +94,43 @@ def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
 
     plt.axes(axs[2])
     plot_duration_samples(use_samples)
+
+
+def make_animation_callback(z, T_cycle):
+    num_frames = len(z)
+    zR, zG = z.T
+    time_max = T_cycle * num_frames
+
+    fig, axs = plt.subplots(2, 1, figsize=(8,6))
+
+    plt.axes(axs[0])
+    plot_frames(zG, 'g')
+    plot_frames(zR, 'r')
+    frames_ylim = plt.ylim()
+
+    plt.axes(axs[1])
+    line, = plt.plot([], 'r')
+    plt.xlim(0, time_max)
+    plt.ylim(frames_ylim)
+
+    ax = axs[1]
+    ax.autoscale(False)
+    plt.ion()
+    plt.show()
+
+    background = fig.canvas.copy_from_bbox(ax.bbox)
+
+    def update_trace(theta):
+        (times, vals), u, ch2_transform = theta
+        xs = np.array([0.] + list(times) + [time_max]) - u
+        ys = np.repeat(vals, 2)
+
+        line.set_data(xs, ys)
+        ax.draw_artist(line)
+
+    def callback(alpha, theta, accept):
+        fig.canvas.restore_region(background)
+        update_trace(theta)
+        fig.canvas.blit(ax.bbox)
+
+    return callback

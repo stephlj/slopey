@@ -6,7 +6,7 @@
 - [x] rename 'theta' to 'x', use 'theta' to refer to the tuple
   (x, frame_offset, ch2_transform_params)
 - [x] slopey duration histograms
-- [ ] animation <-Steph wants to move to embellishments
+- [x] animation <-Steph wants to move to embellishments
 - [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)
 - [ ] gaussian shot noise
 - [ ] learn the noise parameters
@@ -24,8 +24,8 @@
 - think about multiple fast flat bits: is that an HMM again?
 
 ## ideas possibly out of scope / unnecessary
-- [ ] geweke tests
-- [ ] generate loglike automatically using prob prog!
+- geweke tests
+- generate loglike automatically using prob prog!
 
 ## Analysis wish list:
 Data consist of relatively long-lived “flat bits” where the intensity values

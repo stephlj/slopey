@@ -5,13 +5,14 @@ import numpy.random as npr
 from priors import make_prior, make_proposal
 from camera_model import make_camera_model
 from samplers import run_mh
+from plotting import make_animation_callback
 
 def ensure_2d(z):
     z = np.squeeze(z)
     assert z.ndim == 2 and z.shape[1] == 2
     return z
 
-def model1(num_slopey, prior_params, camera_params, proposal_params, z):
+def model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=False):
     z = ensure_2d(z)
     T_cycle, _, _ = camera_params
 
@@ -28,7 +29,14 @@ def model1(num_slopey, prior_params, camera_params, proposal_params, z):
 
     # make a callback to print how often proposals are accepted
     accepts = []
-    callback = lambda alpha, theta, accept: accepts.append(accept)
+    if animate:
+        animation_callback = make_animation_callback(z, T_cycle)
+        def callback(alpha, theta, accept):
+            accepts.append(accept)
+            animation_callback(alpha, theta, accept)
+    else:
+        def callback(alpha, theta, accept):
+            accepts.append(accept)
 
     # make an initial guess by sampling from the prior
     theta_init = prior_sample(num_slopey, T_cycle)
