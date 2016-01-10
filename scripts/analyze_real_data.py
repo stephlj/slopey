@@ -56,15 +56,28 @@ proposal_params = (1e3, 1e3), 1e3, 1e3
 
 ### running inference
 
-# make a runner function
-run = model1(num_slopey, prior_params, camera_params, proposal_params, z)
+# make a runner function and run it
+# run = model1(num_slopey, prior_params, camera_params, proposal_params, z)
+# samples = run(num_iterations)
 
-# run it
-samples = run(num_iterations)
+# make a movie
+from moviepy.video.io.bindings import mplfig_to_npimage
+from moviepy.editor import VideoClip
 
-# discard half of the samples as warm-up (since initialization was random)
-samples = samples[num_iterations//2:]
+run = model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=True)
+fig = plt.gcf()
+plt.ioff()
 
-# plot the results
-plot_samples(samples, z, T_cycle, warmup=1000)
-plt.show()
+def make_frame_mpl(t):
+    run(3)
+    return mplfig_to_npimage(fig)
+
+animation = VideoClip(make_frame_mpl, duration=30)
+animation.write_videofile('mh.mp4',fps=100)
+
+# # discard half of the samples as warm-up (since initialization was random)
+# samples = samples[num_iterations//2:]
+
+# # plot the results
+# plot_samples(samples, z, T_cycle, warmup=1000)
+# plt.show()

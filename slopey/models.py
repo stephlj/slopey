@@ -46,7 +46,7 @@ def model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=
     def run(num_iter):
         new_samples = run_mh(samples[-1], log_p, proposal_distn, num_iter, callback)
         samples.extend(new_samples)
-        print 'accept proportion: %0.3f' % np.mean(accepts)
+        # print 'accept proportion: %0.3f' % np.mean(accepts)
         return samples
 
     return run

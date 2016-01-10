@@ -115,8 +115,6 @@ def make_animation_callback(z, T_cycle):
 
     ax = axs[1]
     ax.autoscale(False)
-    plt.ion()
-    plt.show()
 
     background = fig.canvas.copy_from_bbox(ax.bbox)
 
@@ -126,7 +124,7 @@ def make_animation_callback(z, T_cycle):
         ys = np.repeat(vals, 2)
 
         line.set_data(xs, ys)
-        ax.draw_artist(line)
+        # ax.draw_artist(line)
 
     def callback(alpha, theta, accept):
         fig.canvas.restore_region(background)
