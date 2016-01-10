@@ -72,8 +72,8 @@ def make_frame_mpl(t):
     run(3)
     return mplfig_to_npimage(fig)
 
-animation = VideoClip(make_frame_mpl, duration=30)
-animation.write_videofile('mh.mp4',fps=100)
+animation = VideoClip(make_frame_mpl, duration=10)
+animation.write_videofile('mh.mp4',fps=200)
 
 # # discard half of the samples as warm-up (since initialization was random)
 # samples = samples[num_iterations//2:]
