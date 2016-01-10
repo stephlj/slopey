@@ -6,7 +6,7 @@ from scipy.io import loadmat
 
 from slopey.noise_models import make_gaussian_model
 from slopey.models import model1
-from slopey.plotting import plot_samples
+from slopey.plotting import plot_samples, make_animation_callback
 
 npr.seed(0)  # reproducible
 

@@ -24,8 +24,8 @@
 - think about multiple fast flat bits: is that an HMM again?
 
 ## ideas possibly out of scope / unnecessary
-- [ ] geweke tests
-- [ ] generate loglike automatically using prob prog!
+- geweke tests
+- generate loglike automatically using prob prog!
 
 ## Analysis wish list:
 Data consist of relatively long-lived “flat bits” where the intensity values
