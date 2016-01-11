@@ -123,7 +123,7 @@ def make_animation_callback(z, T_cycle):
         (times, vals), u, (a, b) = theta
         xs = np.array([0.] + list(times) + [time_max]) - u
         red_ys = np.repeat(vals, 2)
-        green_ys = a*((np.max(vals) - np.min(vals)) - red_ys) + b
+        green_ys = a*(np.max(vals) - red_ys) + b
 
         redline.set_data(xs, red_ys)
         greenline.set_data(xs, green_ys)
