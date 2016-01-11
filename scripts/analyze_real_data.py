@@ -57,7 +57,7 @@ proposal_params = (1e3, 1e3), 1e3, 1e3
 ### running inference
 
 # make a runner function
-run = model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=True)
+run = model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=False)
 
 # run it
 samples = run(num_iterations)
