@@ -109,7 +109,8 @@ def make_animation_callback(z, T_cycle):
     frames_ylim = plt.ylim()
 
     plt.axes(axs[1])
-    line, = plt.plot([], 'r')
+    redline, = plt.plot([], 'r')
+    greenline, = plt.plot([], 'g')
     plt.xlim(0, time_max)
     plt.ylim(frames_ylim)
 
@@ -121,12 +122,15 @@ def make_animation_callback(z, T_cycle):
     background = fig.canvas.copy_from_bbox(ax.bbox)
 
     def update_trace(theta):
-        (times, vals), u, ch2_transform = theta
+        (times, vals), u, (a, b) = theta
         xs = np.array([0.] + list(times) + [time_max]) - u
-        ys = np.repeat(vals, 2)
+        red_ys = np.repeat(vals, 2)
+        green_ys = a*(np.max(vals) - red_ys) + b
 
-        line.set_data(xs, ys)
-        ax.draw_artist(line)
+        redline.set_data(xs, red_ys)
+        greenline.set_data(xs, green_ys)
+        ax.draw_artist(redline)
+        ax.draw_artist(greenline)
 
     def callback(alpha, theta, accept):
         fig.canvas.restore_region(background)
