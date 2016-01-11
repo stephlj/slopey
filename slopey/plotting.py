@@ -47,7 +47,7 @@ def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
 
         def flip_to_ch2(x):
             times, vals = x
-            return times, np.max(vals) - vals + np.min(vals)
+            return times, np.max(vals) - vals
 
         def transform_to_measured_ch2(x):
             a, b = ch2_transform
