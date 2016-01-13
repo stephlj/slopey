@@ -7,6 +7,7 @@
   (x, frame_offset, ch2_transform_params)
 - [x] slopey duration histograms
 - [x] animation <-Steph wants to move to embellishments
+- [ ] add gui for initialization
 - [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)
 - [ ] gaussian shot noise
 - [ ] learn the noise parameters
