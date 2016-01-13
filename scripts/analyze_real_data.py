@@ -1,6 +1,8 @@
 from __future__ import division
 import numpy as np
 import numpy.random as npr
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
 
@@ -12,34 +14,37 @@ npr.seed(0)  # reproducible
 
 
 ### load data
-datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_115_Results.mat')
+datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_Results.mat')
 zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
-# z = np.hstack((zR[:,None], zG[:,None]))[:1000]
-z = np.hstack((zR[:,None], zG[:,None]))[250:]
+start = np.squeeze(datadict['start']);
+end = sum(np.squeeze(datadict['model_durations']));
+z = np.hstack((zR[:,None], zG[:,None]))[350:end]
 
 
 ### setting parameters
 
 # set how many slopey bits are expected
 # For now: get this info from the old HMM analysis
-num_slopey = 2
-# num_slopey = len(datadict['model_durations'].ravel())-1
+# num_slopey = 2
+num_slopey = len(datadict['model_durations'].ravel())-1
 
 # set number of iterations of MH
-num_iterations = 7500
+num_iterations = 10000
 
 # set camera model parameters
 T_cycle = 0.036
+# T_cycle = 0.1356
 T_blank = 0.00175
+# T_blank = 0.0356
 noise_sigmasq = 0.2
 camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
 
 # set prior hyperparameters
-intensity_hypers = 1., 1./3  # exponential prior with mean of alpha/beta = 3
+intensity_hypers = 1., 3  # exponential prior with mean of alpha/beta = 3
 
 slopey_time_hypers = 1., 3.
-flat_time_hypers = 1., 1./5.
+flat_time_hypers = 1., 1.
 
 trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
 
