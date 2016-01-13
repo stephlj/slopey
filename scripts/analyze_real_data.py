@@ -19,7 +19,7 @@ zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
 start = np.squeeze(datadict['start']);
 end = sum(np.squeeze(datadict['model_durations']));
-z = np.hstack((zR[:,None], zG[:,None]))[350:end]
+z = np.hstack((zR[:,None], zG[:,None]))[start:end+500]
 
 
 ### setting parameters
@@ -30,7 +30,7 @@ z = np.hstack((zR[:,None], zG[:,None]))[350:end]
 num_slopey = len(datadict['model_durations'].ravel())-1
 
 # set number of iterations of MH
-num_iterations = 10000
+num_iterations = 7500
 
 # set camera model parameters
 T_cycle = 0.036
@@ -62,7 +62,7 @@ proposal_params = (1e3, 1e3), 1e3, 1e3
 ### running inference
 
 # make a runner function
-run = model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=False)
+run = model1(num_slopey, prior_params, camera_params, proposal_params, z, animate=True)
 
 # run it
 samples = run(num_iterations)

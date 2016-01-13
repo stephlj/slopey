@@ -77,7 +77,12 @@ def make_prior(prior_params):
         def sample_u():
             return npr.uniform() * T_cycle
 
-        x = sample_x(trace_params)
+        # x = sample_x(trace_params)
+        # instead of initializing by sampling from the prior, asserting an initialization here:
+        # times_asserted = [454,456,524,526]
+        times_asserted = np.array([16,18,20,22]) # whoops need seconds not frames
+        vals_asserted = np.array([1.7,1,0.35])
+        x = (times_asserted,vals_asserted)
         u = sample_u()
         ch2_transform = sample_ch2_transform(ch2_transform_params)
 
