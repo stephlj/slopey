@@ -19,7 +19,8 @@ zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
 start = np.squeeze(datadict['start']);
 end = sum(np.squeeze(datadict['model_durations']));
-z = np.hstack((zR[:,None], zG[:,None]))[350:end]
+# z = np.hstack((zR[:,None], zG[:,None]))[start:end]
+z = np.hstack((zR[:,None], zG[:,None]))[300:end]
 
 
 ### setting parameters
@@ -32,7 +33,7 @@ num_slopey = len(datadict['model_durations'].ravel())-1
 # set number of iterations of MH
 num_iterations = 10000
 
-# set camera model parameters
+# set camera model parameters. T_cycle is the total time frame-to-frame, so it includes T_blank
 T_cycle = 0.036
 # T_cycle = 0.1356
 T_blank = 0.00175
@@ -44,7 +45,7 @@ camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
 intensity_hypers = 1., 3  # exponential prior with mean of alpha/beta = 3
 
 slopey_time_hypers = 1., 3.
-flat_time_hypers = 1., 1.
+flat_time_hypers = 1., 1./5.
 
 trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
 
