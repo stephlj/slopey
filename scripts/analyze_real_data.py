@@ -14,13 +14,13 @@ npr.seed(0)  # reproducible
 
 
 ### load data
-datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_187_Results.mat')
+datadict = loadmat('data/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_115_Results')
 zR = np.squeeze(datadict['unsmoothedRedI'])
 zG = np.squeeze(datadict['unsmoothedGrI'])
 start = np.squeeze(datadict['start']);
 end = sum(np.squeeze(datadict['model_durations']));
 # z = np.hstack((zR[:,None], zG[:,None]))[start:end]
-z = np.hstack((zR[:,None], zG[:,None]))[300:end]
+z = np.hstack((zR[:,None], zG[:,None]))[250:end]
 
 
 ### setting parameters
@@ -31,7 +31,7 @@ z = np.hstack((zR[:,None], zG[:,None]))[300:end]
 num_slopey = len(datadict['model_durations'].ravel())-1
 
 # set number of iterations of MH
-num_iterations = 10000
+num_iterations = 20000
 
 # set camera model parameters. T_cycle is the total time frame-to-frame, so it includes T_blank
 T_cycle = 0.036
@@ -68,9 +68,8 @@ run = model1(num_slopey, prior_params, camera_params, proposal_params, z, animat
 # run it
 samples = run(num_iterations)
 
-# discard half of the samples as warm-up (since initialization was random)
-samples = samples[num_iterations//2:]
 
-# plot the results
-plot_samples(samples, z, T_cycle, warmup=1000)
+# plot the results, discarding half of the samples as warm-up
+# (since initialization was random)
+plot_samples(samples, z, T_cycle, warmup=num_iterations//2)
 plt.show()

@@ -37,8 +37,7 @@ def make_camera_model(camera_params):
         b = (T_cycle - T_blank) * b  # make affine reparameterization invariant
 
         def flip(y):
-            times, vals = x
-            return np.max(vals) - y  # + np.min(vals)
+            return np.max(y) - y  # + np.min(vals)
 
         y2 = a * flip(y1) + b
         return np.hstack((y1[:,None], y2[:,None]))
