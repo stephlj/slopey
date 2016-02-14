@@ -7,17 +7,36 @@ from functools import partial
 from operator import itemgetter
 
 
+def flip(x):
+    times, vals = x
+    return times, np.max(vals) - vals
+
+
+def red_to_green(x, transform_params):
+    a, b = transform_params
+    times, vals = flip(x)
+    return times,  a * vals + b
+
+
 def make_camera_model(camera_params):
     T_cycle, T_blank, noise_model = camera_params
     noise_loglike, noise_sample = noise_model
 
     def loglike(z, theta):
-        x, u, ch2_transform_params = theta
+        x_red, u, ch2_transform_params = theta
         assert z.ndim == 2 and z.shape[1] == 2
         num_frames = z.shape[0]
-        F = make_integrated_x(x)
-        y = noiseless_measurements(F, u, num_frames)
-        y_2ch = add_second_channel(y, x, ch2_transform_params)
+
+        # red channel
+        y_red = noiseless_measurements(make_integrated_x(x_red), u, num_frames)
+
+        # green channel
+        x_green = red_to_green(x_red, ch2_transform_params)
+        y_green = noiseless_measurements(make_integrated_x(x_green), u, num_frames)
+
+        # combine the two channels
+        y_2ch = np.hstack((y_red[:,None], y_green[:,None]))
+
         return noise_loglike(y_2ch, z)
 
     def sample(theta, num_frames):
@@ -31,16 +50,6 @@ def make_camera_model(camera_params):
         starts = u + np.linspace(0, num_frames * T_cycle, num_frames, endpoint=False)
         stops = starts + T_cycle - T_blank
         return (F(stops) - F(starts)) / (T_cycle - T_blank)  # each box has unit area
-
-    def add_second_channel(y1, x, ch2_transform_params):
-        a, b = ch2_transform_params
-        b = (T_cycle - T_blank) * b  # make affine reparameterization invariant
-
-        def flip(y):
-            return np.max(y) - y  # + np.min(vals)
-
-        y2 = a * flip(y1) + b
-        return np.hstack((y1[:,None], y2[:,None]))
 
     return loglike, sample
 

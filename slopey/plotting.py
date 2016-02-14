@@ -2,6 +2,8 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
+from camera_model import flip, red_to_green
+
 # TODO these plots might be off by one cycle
 
 # http://stackoverflow.com/a/20007730
@@ -50,18 +52,9 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
         x, u, ch2_transform = sample
         time_max = T_cycle * num_frames
 
-        def flip_to_ch2(x):
-            times, vals = x
-            return times, np.max(vals) - vals
-
-        def transform_to_measured_ch2(x):
-            a, b = ch2_transform
-            times, vals = flip_to_ch2(x)
-            return times, a * vals + b
-
         plot_trace(x, time_max, u, color='r', **kwargs)
-        plot_trace(flip_to_ch2(x), time_max, u, color='g', **kwargs)
-        # plot_trace(transform_to_measured_ch2(x), time_max, u, color='g', **kwargs)
+        plot_trace(flip(x), time_max, u, color='g', **kwargs)
+        plot_trace(red_to_green(x, ch2_transform), time_max, u, color='lightgreen', **kwargs)
 
         plt.xlabel('time (sec)')
         plt.ylabel('inferred latent intensity')
