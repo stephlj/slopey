@@ -2,7 +2,12 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
+from camera_model import flip, red_to_green
+
 # TODO these plots might be off by one cycle
+
+# http://stackoverflow.com/a/20007730
+ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
 
 
 def plot_trace(x, time_max=None, time_offset=0.,
@@ -37,26 +42,19 @@ def plot_frames(seq, colorstr):
     plt.ylabel('measured intensity')
 
 
-def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
+def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
     num_frames = len(z)
+    warmup = warmup if warmup is not None else len(samples) // 2
     zR, zG = z.T
+    samples = samples[warmup:]
 
     def plot_trace_sample(sample, **kwargs):
         x, u, ch2_transform = sample
         time_max = T_cycle * num_frames
 
-        def flip_to_ch2(x):
-            times, vals = x
-            return times, np.max(vals) - vals
-
-        def transform_to_measured_ch2(x):
-            a, b = ch2_transform
-            times, vals = flip_to_ch2(x)
-            return times, a * vals + b
-
         plot_trace(x, time_max, u, color='r', **kwargs)
-        plot_trace(flip_to_ch2(x), time_max, u, color='g', linestyle=':', **kwargs)
-        plot_trace(transform_to_measured_ch2(x), time_max, u, color='g', **kwargs)
+        plot_trace(flip(x), time_max, u, color='g', **kwargs)
+        plot_trace(red_to_green(x, ch2_transform), time_max, u, color='lightgreen', **kwargs)
 
         plt.xlabel('time (sec)')
         plt.ylabel('inferred latent intensity')
@@ -69,11 +67,15 @@ def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
             times, vals = x
             return np.diff(times)[::2]
 
-        sampled_durations = [d for sample in samples for d in get_slopey_durations(sample)]
-        density = gaussian_kde(sampled_durations)
         t = np.linspace(0, 4, 250)
-        plt.plot(t, density(t))
+        sampled_durations = np.array([get_slopey_durations(sample) for sample in samples])
+        num_slopey = sampled_durations.shape[1]
 
+        for slopey_idx, durations in enumerate(sampled_durations.T):
+            plt.plot(t, gaussian_kde(durations)(t)/num_slopey, label=ordinal(slopey_idx+1))
+        plt.plot(t, gaussian_kde(sampled_durations.ravel())(t), ':', label='overall')
+
+        plt.legend(loc='best')
         plt.xlabel('inferred slopey bit durations (seconds)')
         plt.ylabel('probability density')
 
@@ -85,15 +87,13 @@ def plot_samples(samples, z, T_cycle, warmup=0, use_every_k_samples=50):
     plt.xlim(0, num_frames + 1)
     frames_ylim = plt.ylim()
 
-    use_samples = samples[-1:warmup:-use_every_k_samples]
-
     plt.axes(axs[1])
-    for sample in use_samples:
+    for sample in samples[-1::-use_every_k_samples]:
         plot_trace_sample(sample, alpha=0.05)
     plt.ylim(frames_ylim)
 
     plt.axes(axs[2])
-    plot_duration_samples(use_samples)
+    plot_duration_samples(samples)
 
 
 def make_animation_callback(z, T_cycle):
