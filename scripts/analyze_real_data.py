@@ -20,7 +20,7 @@ zG = np.squeeze(datadict['unsmoothedGrI'])
 start = np.squeeze(datadict['start']);
 end = sum(np.squeeze(datadict['model_durations']));
 # z = np.hstack((zR[:,None], zG[:,None]))[start:end]
-z = np.hstack((zR[:,None], zG[:,None]))[300:end]
+z = np.hstack((zR[:,None], zG[:,None]))[250:end]
 
 
 ### setting parameters
@@ -31,7 +31,7 @@ z = np.hstack((zR[:,None], zG[:,None]))[300:end]
 num_slopey = len(datadict['model_durations'].ravel())-1
 
 # set number of iterations of MH
-num_iterations = 10000
+num_iterations = 7500
 
 # set camera model parameters. T_cycle is the total time frame-to-frame, so it includes T_blank
 T_cycle = 0.036
