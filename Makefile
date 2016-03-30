@@ -14,7 +14,7 @@ ANALYSIS_LIB = $(addprefix slopey/, load.py models.py camera_model.py \
                                     noise_models.py priors.py samplers.py)
 PLOTTING_LIB = $(addprefix slopey/, load.py plotting.py)
 
-###
+### end configuration
 
 export PYTHONPATH = .
 NAMES = $(notdir $(FILES))
