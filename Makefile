@@ -2,11 +2,13 @@
 
 # input files
 FILES = $(wildcard data/*.mat)
-GLOBALPARAMS = params.yml
 
 # output directories
 RESULTSDIR = results
 FIGDIR = figures
+
+# global parameters file with default configuration
+GLOBALPARAMS = data/params.yml
 
 # these variales set up dependencies on the library files, so that analysis
 # or plotting can be re-run when library functions change
