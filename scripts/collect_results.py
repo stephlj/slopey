@@ -6,13 +6,11 @@ from glob import glob
 from os.path import join, basename
 from scipy.io import savemat
 
-
 def load_results(resultsfile):
     with open(resultsfile) as infile:
         results = pickle.load(infile)
     key = basename(resultsfile).split('.')[0]
     return key, results
-
 
 
 if __name__ == '__main__':
