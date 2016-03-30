@@ -19,9 +19,9 @@ if __name__ == "__main__":
         results = pickle.load(infile)
 
     params, samples, data = results['params'], results['samples'], results['data']
-    T_cycle = params['T_cycle']
+    T_cycle, start, end = params['T_cycle'], params['start'], params['end']
 
     npr.seed(0)
-    plot_samples(samples, data, T_cycle, warmup=len(samples)//2)
+    plot_samples(samples, data[start:end], T_cycle, warmup=len(samples)//2)
 
     plt.savefig(outfile)

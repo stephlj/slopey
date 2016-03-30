@@ -19,22 +19,6 @@ def load_data(filepath):
 
     return z, defaults
 
-def load_params_old(filepath):
-    linepat = compile(r'[A-Za-z0-9_]+\s*=\s*[0-9]+(?:\.[0-9]+)?')
-    val_parsers = defaultdict(
-        lambda: float,
-        {'start':int, 'end':int, 'num_slopey':int, 'num_iterations':int})
-
-    def parse_line(line):
-        name, valstr = map(strip, line.split('='))
-        return name, val_parsers[name](valstr)
-
-    with open(filepath, 'r') as infile:
-        params = dict(parse_line(line) for line in infile
-                      if not line.startswith('#') and linepat.match(line))
-
-    return params
-
 def load_params(filepath):
     with open(filepath) as infile:
         params = yaml.safe_load(infile)
