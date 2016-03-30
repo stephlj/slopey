@@ -29,7 +29,7 @@ clean: ; rm -f $(ALL)
 
 .SECONDEXPANSION:
 $(RESULTSDIR)/%.results.pkl: scripts/analyze_trace.py data/%.mat $(GLOBALPARAMS) \
-                             $$(wildcard data/%.params.txt) $(ANALYSIS_LIB)
+                             $$(wildcard data/%.params.yml) $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
 	python $(filter-out slopey/%, $^) $@
 

@@ -20,6 +20,7 @@ def run_analysis(
     prior_params = trace_params, ch2_transform_hypers
     camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
 
+    data = data[start:end]
     run = model1(num_slopey, prior_params, camera_params, proposal_params, data, animate=False)
     samples = run(num_iterations)
 
