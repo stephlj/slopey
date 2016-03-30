@@ -1,34 +1,20 @@
-![inference](plots/inference.png)
+![inference](figures/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_191_Results.png)
 
-## TODO now
-- [x] test and debug >1 slopey bit version
-- [x] red and green channels separate
-- [x] rename 'theta' to 'x', use 'theta' to refer to the tuple
-  (x, frame_offset, ch2_transform_params)
-- [x] slopey duration histograms
-- [x] animation <-Steph wants to move to embellishments
-- [ ] add gui for initialization
-- [ ] set prior based on old HMM analysis? (Output of old HMM is in Results.mat data files)
-- [ ] gaussian shot noise
+## short-term todos
+- [x] makefile workflow
 - [ ] learn the noise parameters
+- [ ] make animation script
 
-## embellishment menu
-- animation
-- infer number of slopey bits (RJ MCMC)
-- positive probability of instantaneous jumps (just make slopey duration
-  density have a delta at zero)
-- hmc / nuts sampling (sampyl could work, only necessary with more
-  dimensions)
-- reuse of energy levels (just sample energy levels ahead of time, add
-  sequential structure)
-- think about 'energy ladders' in the prior
-- think about multiple fast flat bits: is that an HMM again?
+## long-term possible todos
+- [ ] gaussian shot noise
+- [ ] infer number of slopey bits (RJ MCMC)
+- [ ] positive probability of instantaneous jumps
+- [ ] hmc / nuts sampling
+- [ ] reuse of energy levels
+- [ ] think about 'energy ladders' in the prior
+- [ ] think about multiple fast flat bits: is that an HMM again?
 
-## ideas possibly out of scope / unnecessary
-- geweke tests
-- generate loglike automatically using prob prog!
-
-## Analysis wish list:
+## Notes and wish list
 Data consist of relatively long-lived “flat bits” where the intensity values
 appear to be Gaussian scatter around a mean value (that is, they seem to be
 well described as a constant intensity value with some noise). These flat bits
