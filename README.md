@@ -2,6 +2,7 @@
 
 ## short-term todos
 - [x] makefile workflow
+- [ ] improve duration plotting: rugplot, smoother density
 - [ ] learn the noise parameters
 - [ ] make animation script
 
