@@ -9,8 +9,8 @@ from scipy.io import savemat
 def load_results(resultsfile):
     with open(resultsfile) as infile:
         results = pickle.load(infile)
-    key = basename(resultsfile).split('.')[0]
-    return key, results
+    experiment_name = basename(resultsfile).split('.')[0]
+    return experiment_name, results
 
 
 if __name__ == '__main__':
@@ -20,6 +20,6 @@ if __name__ == '__main__':
         print >>sys.stderr, '{} results_directory out.mat'.format(sys.argv[0])
 
     all_files = glob(join(resultsdir, '*.results.pkl'))
-    all_results = dict(map(load_results, all_files))
+    all_results = dict(load_results(file) for file in all_files)
 
     savemat(outfile, all_results, long_field_names=True, oned_as='column')
