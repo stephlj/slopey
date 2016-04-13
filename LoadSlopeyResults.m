@@ -17,8 +17,8 @@ for k = 1:length(names)
     results{k}.name = names(k).name(1:end-4);
     results{k}.fps = 1/struct_py.params.T_cycle;
     results{k}.data = struct_py.data;
-    results{k}.start = struct_py.params.start;
-    results{k}.end = struct_py.params.end;
+    results{k}.start = double(struct_py.params.start);
+    results{k}.end = double(struct_py.params.end);
     
     samples = struct_py.samples;
     % Each structure in allresults has 3 fields: params, data, and samples.
@@ -39,7 +39,6 @@ for k = 1:length(names)
         results{k}.times = zeros(size(samples,1),size(samples{1,1}{1},1));
         results{k}.vals = zeros(size(samples,1),size(samples{1,1}{2},1));
     catch
-        keyboard
         results{k}.times = zeros(size(samples,1),2);
         results{k}.vals = zeros(size(samples,1),2);
     end
