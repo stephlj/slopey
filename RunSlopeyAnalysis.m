@@ -24,8 +24,8 @@ all_second_duration = [];
 all_third_duration = [];
 
 k=1;
-disp(',: back one trace; .: forward; s: change _s_tart crop;')
-disp('e: change _e_nd crop')
+disp(',: back one trace; .: forward; s: change _s_tart crop; e: change _e_nd crop')
+disp('n: change _n_umber of slopey bits')
 
 while k <= length(names)
     currstruct = results{k};
@@ -57,7 +57,7 @@ while k <= length(names)
             elseif cc=='s' || cc=='e'
                 [x,~] = ginput(1);
                 x = round(x*currstruct.fps);
-                if x>0 && x<currstruct.end
+                if x>0 && x<size(currstruct.data,1)
                     if cc=='s'
                         EditYAMLfile(fullfile(maindir,'data',strcat(currstruct.name,'.params.yml')),'start',x);
                     else
@@ -69,7 +69,13 @@ while k <= length(names)
                     disp('Invalid start value')
                 end
                 cc=13;
-                
+            elseif cc=='n'
+                new_num = round(input('How many slopey bits to find? '));
+                if new_num>0
+                    EditYAMLfile(fullfile(maindir,'data',strcat(currstruct.name,'.params.yml')),'num_slopey',new_num);
+                    system('make');
+                    results = LoadSlopeyResults();
+                end
             % Don't let extra "enters" build up:
             elseif isequal(cc,char(13)) %13 is the ascii code for the return key
                 cc=13;

@@ -83,6 +83,7 @@ perc_dur_to_analyze = 10; % Will keep the last 10% of durations
         end
         clear times vals max_red
     end
+    xlim([max(0,start_time-10) min(end_time+10,length(xvectData))])
     hold off
     
     % Now plot the last 10% of the slopey durations:

@@ -23,9 +23,10 @@ function EditYAMLfile(filename,paramname,paramvalue)
             end
             fclose(f);
         else
-            old_params = -1;
+            old_params = struct();
         end
     end
+
     % write function
     function write_yml(name,new_params)
         fields = fieldnames(new_params);
@@ -43,10 +44,6 @@ function EditYAMLfile(filename,paramname,paramvalue)
     end
 
     old = load_yml(filename);
-    
-    if ~isstruct(old)
-        clear old
-    end
     
     old.(paramname) = num2str(paramvalue);
     
