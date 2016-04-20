@@ -12,7 +12,7 @@ results_py = load(fullfile(maindir,'results','all_results.mat'));
 results = cell(1,length(names));
 
 for k = 1:length(names)
-    struct_py = eval(strcat('results_py.',names(k).name(1:end-4)));
+    struct_py = results_py.(names(k).name(1:end-4));
     
     results{k}.name = names(k).name(1:end-4);
     results{k}.fps = 1/struct_py.params.T_cycle;
@@ -38,17 +38,19 @@ for k = 1:length(names)
     try
         results{k}.times = zeros(size(samples,1),size(samples{1,1}{1},1));
         results{k}.vals = zeros(size(samples,1),size(samples{1,1}{2},1));
+        non_vector = 1;
     catch
         results{k}.times = zeros(size(samples,1),2);
         results{k}.vals = zeros(size(samples,1),2);
+        non_vector = 0;
     end
     for j = 1:size(samples,1)
         results{k}.ch2_transform(j,:) = samples{j,3};
         results{k}.offset(j,:) = samples{j,2};
-        try
+        if non_vector == 1
             results{k}.times(j,:) = samples{j,1}{1};
             results{k}.vals(j,:) = samples{j,1}{2};
-        catch
+        else
             results{k}.times(j,:) = samples{j,1}(1,:);
             results{k}.vals(j,:) = samples{j,1}(2,:);
         end
