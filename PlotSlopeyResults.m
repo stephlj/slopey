@@ -1,4 +1,4 @@
-% function PlotSlopeyResults(input_struct)
+% function PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze)
 %
 % Given the slopey analysis results for one trace, plots the results of the last
 % samples_to_plot iterations on top of the raw data, and histograms the
@@ -7,10 +7,10 @@
 %
 % Steph 4/2016
 
-function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct)
+function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze)
 
-samples_to_plot = 10; % will plot the results of the last samples_to_plot iterations
-perc_dur_to_analyze = 10; % Will keep the last 10% of durations
+if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will plot the results of the last samples_to_plot iterations
+if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
 
     % Given red intensities and the fit parameters for green channel,
     % return non-idealized green
@@ -90,7 +90,7 @@ perc_dur_to_analyze = 10; % Will keep the last 10% of durations
     first_dur = [];
     second_dur = [];
     third_dur = [];
-    for d = length(input_struct.offset):-1:(length(input_struct.offset)-length(input_struct.offset)/perc_dur_to_analyze)
+    for d = length(input_struct.offset):-1:(length(input_struct.offset)-length(input_struct.offset)/(perc_dur_to_analyze*100))
         times = input_struct.times(d,:);
         first_dur(end+1) = times(2) - times(1);
         if length(times) > 2

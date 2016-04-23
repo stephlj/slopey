@@ -1,8 +1,11 @@
-% function results = LoadSlopeyResults(path)
+% function results = LoadSlopeyResults(samples_to_plot,perc_dur_to_analyze)
 %
 % Steph 4/2016
 
-function results = LoadSlopeyResults(data_name)
+function results = LoadSlopeyResults(samples_to_plot,perc_dur_to_analyze)
+
+if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will load only the results of the last samples_to_plot iterations
+if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
 
 maindir = '/Users/Steph/Documents/UCSF/Narlikar lab/HMM analysis Slopey/slopey';
 names = dir(fullfile(maindir,'data','*.mat'));
@@ -33,18 +36,20 @@ for k = 1:length(names)
     % currstruct.samples{n,3} is a 2x1 vector that gives the transformation
     % parameters to obtain real green values instead of idealized ones.
 
-    results{k}.ch2_transform = zeros(size(samples,1),2);
-    results{k}.offset = zeros(size(samples,1),1);
+    num_samples_to_load = round(max(samples_to_plot,perc_dur_to_analyze*size(samples,1)));
+    
+    results{k}.ch2_transform = zeros(num_samples_to_load,2);
+    results{k}.offset = zeros(num_samples_to_load,1);
     try
-        results{k}.times = zeros(size(samples,1),size(samples{1,1}{1},1));
-        results{k}.vals = zeros(size(samples,1),size(samples{1,1}{2},1));
+        results{k}.times = zeros(num_samples_to_load,size(samples{1,1}{1},1));
+        results{k}.vals = zeros(num_samples_to_load,size(samples{1,1}{2},1));
         non_vector = 1;
     catch
-        results{k}.times = zeros(size(samples,1),2);
-        results{k}.vals = zeros(size(samples,1),2);
+        results{k}.times = zeros(num_samples_to_load,2);
+        results{k}.vals = zeros(num_samples_to_load,2);
         non_vector = 0;
     end
-    for j = 1:size(samples,1)
+    for j = (size(samples,1)-num_samples_to_load-1):size(samples,1)
         results{k}.ch2_transform(j,:) = samples{j,3};
         results{k}.offset(j,:) = samples{j,2};
         if non_vector == 1

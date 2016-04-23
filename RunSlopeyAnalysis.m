@@ -4,6 +4,9 @@
 
 function RunSlopeyAnalysis()
 
+samples_to_plot = 10; % will plot the results of the last samples_to_plot iterations
+perc_dur_to_analyze = 0.10; % Will keep the last perc_dur_to_analyze% of durations
+
 fig_pos = [100,400,900,700];
 figure('Position',fig_pos)
 
@@ -17,7 +20,7 @@ system('make'); % Update anything that needs updating
 names = dir(fullfile(maindir,'data','*.mat'));
 
 % allresults = load(fullfile(maindir,'results','all_results.mat'));
-results = LoadSlopeyResults();
+results = LoadSlopeyResults(samples_to_plot,perc_dur_to_analyze);
 
 all_first_duration = [];
 all_second_duration = [];
@@ -30,7 +33,7 @@ disp('n: change _n_umber of slopey bits')
 while k <= length(names)
     currstruct = results{k};
     
-    [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct);
+    [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,samples_to_plot,perc_dur_to_analyze);
     
     all_first_duration = [all_first_duration, first_duration];
     all_second_duration = [all_second_duration, second_duration];
@@ -64,7 +67,7 @@ while k <= length(names)
                         EditYAMLfile(fullfile(maindir,'data',strcat(currstruct.name,'.params.yml')),'end',x);
                     end
                     system('make');
-                    results = LoadSlopeyResults();
+                    results = LoadSlopeyResults(samples_to_plot,perc_dur_to_analyze);
                 else
                     disp('Invalid start value')
                 end
@@ -74,7 +77,7 @@ while k <= length(names)
                 if new_num>0
                     EditYAMLfile(fullfile(maindir,'data',strcat(currstruct.name,'.params.yml')),'num_slopey',new_num);
                     system('make');
-                    results = LoadSlopeyResults();
+                    results = LoadSlopeyResults(samples_to_plot,perc_dur_to_analyze);
                 end
             % Don't let extra "enters" build up:
             elseif isequal(cc,char(13)) %13 is the ascii code for the return key
