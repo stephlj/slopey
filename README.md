@@ -3,10 +3,11 @@
 ## short-term todos
 - [x] makefile workflow
 - [ ] improve duration plotting: rugplot, smoother density
-- [ ] learn the noise parameters
-- [ ] make animation script
+- [ ] make inference faster
 
 ## long-term possible todos
+- [ ] learn the noise parameters
+- [ ] make animation script
 - [ ] gaussian shot noise
 - [ ] infer number of slopey bits (RJ MCMC)
 - [ ] positive probability of instantaneous jumps
