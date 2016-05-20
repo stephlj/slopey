@@ -12,6 +12,7 @@ def load_data(filepath):
     get = lambda name: np.squeeze(datadict[name])
     zR, zG = get('unsmoothedRedI'), get('unsmoothedGrI')
     start, end = get('start'), sum(get('model_durations'))
+    end = end+start
     num_slopey = len(get('model_durations').ravel()) - 1
 
     z = np.hstack((zR[:,None], zG[:,None]))
