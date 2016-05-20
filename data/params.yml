@@ -9,6 +9,10 @@ proposal_params: (1e3, 1e3), 1e3, 1e3
 num_iterations: 10000
 
 # camera model parameters
-T_cycle: 0.036
-T_blank: 0.00175
+# 26 fps
+# T_cycle: 0.036
+# T_blank: 0.00175
+# 7.4 fps
+T_cycle: 0.1356
+T_blank: 0.0356
 noise_sigmasq: 0.2

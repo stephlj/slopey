@@ -79,6 +79,7 @@ while k <= length(names)
                     system('make');
                     results = LoadSlopeyResults(samples_to_plot,perc_dur_to_analyze);
                 end
+                cc=13;
             % Don't let extra "enters" build up:
             elseif isequal(cc,char(13)) %13 is the ascii code for the return key
                 cc=13;
