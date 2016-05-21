@@ -26,6 +26,19 @@ all_first_duration = [];
 all_second_duration = [];
 all_third_duration = [];
 
+    % plot histograms
+    function plot_histo(durations,t,subfig_pos)
+        subplot('Position',subfig_pos)
+        [n,xout] = hist(durations,[0:.05:2]);
+        n = n./sum(n);
+        bar(xout,n)
+        xlim([0 2])
+        title(t,'Fontsize',14)
+        xlabel('Duration (sec)','Fontsize',14)
+        ylabel('Frequency','Fontsize',14)
+        set(gca,'Fontsize',12)
+    end
+
 k=1;
 disp(',: back one trace; .: forward; s: change _s_tart crop; e: change _e_nd crop')
 disp('n: change _n_umber of slopey bits')
