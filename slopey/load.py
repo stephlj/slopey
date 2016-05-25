@@ -10,13 +10,18 @@ import yaml
 def load_data(filepath):
     datadict = loadmat(filepath)
     get = lambda name: np.squeeze(datadict[name])
-    zR, zG = get('unsmoothedRedI'), get('unsmoothedGrI')
-    start, end = get('start'), sum(get('model_durations'))
-    end = end+start
-    num_slopey = len(get('model_durations').ravel()) - 1
 
+    # extract red and green channels
+    zR, zG = get('unsmoothedRedI'), get('unsmoothedGrI')
     z = np.hstack((zR[:,None], zG[:,None]))
-    defaults = {'start': start, 'end': end, 'num_slopey': num_slopey}
+
+    # get defaults from HMM fit, can be overridden by params.yml
+    durations = get('model_durations').ravel()
+    start = get('start')
+    end = start + sum(durations)
+    translocation_frame_guesses = np.cumsum(durations[:-1])
+    defaults = {'start': start, 'end': end,
+                'translocation_frame_guesses': translocation_frame_guesses}
 
     return z, defaults
 

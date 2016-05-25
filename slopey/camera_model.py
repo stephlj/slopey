@@ -39,19 +39,12 @@ def make_camera_model(camera_params):
 
         return noise_loglike(y_2ch, z)
 
-    def sample(theta, num_frames):
-        x, u, ch2_transform_params = theta
-        F = make_integrated_x(x)
-        y = noiseless_measurements(F, u, num_frames)
-        y_2ch = add_second_channel(y, x, ch2_transform_params)
-        return noise_sample(y_2ch)
-
     def noiseless_measurements(F, u, num_frames):
         starts = u + np.linspace(0, num_frames * T_cycle, num_frames, endpoint=False)
         stops = starts + T_cycle - T_blank
         return (F(stops) - F(starts)) / (T_cycle - T_blank)  # each box has unit area
 
-    return loglike, sample
+    return loglike
 
 
 ### internals below here!
