@@ -6,22 +6,30 @@ import cPickle as pickle
 
 from slopey.load import load_data, load_params
 from slopey.noise_models import make_gaussian_model
-from slopey.models import model1
+from slopey.analysis import model1, make_hmm_fit_initializer
+
 
 def merge_dicts(*dcts):
     return reduce(lambda d1, d2: dict(d1, **d2), dcts)
 
+
 def run_analysis(
-        data, start, end, num_slopey,
+        data, start, end, translocation_frame_guesses,
         num_iterations, proposal_params,
         intensity_hypers, slopey_time_hypers, flat_time_hypers, ch2_transform_hypers,
-        T_cycle, T_blank, noise_sigmasq):
+        T_cycle, T_blank, noise_sigmasq, **kwargs):
+
+    # concatenate hyperparameters, make gaussian observation model
     trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
     prior_params = trace_params, ch2_transform_hypers
     camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
+    model_params = prior_params, camera_params
 
-    data = data[start:end]
-    run = model1(num_slopey, prior_params, camera_params, proposal_params, data, animate=False)
+    # create initializer function
+    initializer = make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data)
+
+    # construct the sampler and run it
+    run = model1(model_params, proposal_params, data[start:end], initializer)
     samples = run(num_iterations)
 
     return samples

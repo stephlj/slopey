@@ -12,9 +12,9 @@ GLOBALPARAMS = data/params.yml
 
 # these variales set up dependencies on the library files, so that analysis
 # or plotting can be re-run when library functions change
-ANALYSIS_LIB = $(addprefix slopey/, load.py models.py camera_model.py \
-                                    noise_models.py priors.py samplers.py)
-PLOTTING_LIB = $(addprefix slopey/, load.py plotting.py)
+ANALYSIS_LIB = $(addprefix slopey/, load.py analysis.py camera_model.py \
+                                    noise_models.py priors.py samplers.py util.py)
+PLOTTING_LIB = $(addprefix slopey/, load.py plotting.py util.py)
 
 ### end configuration
 
