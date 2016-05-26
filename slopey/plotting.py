@@ -3,15 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from camera_model import flip, red_to_green
+from util import interleave
 
-# TODO these plots might be off by one cycle
+# TODO these time axes might be off by one T_cycle
 
 # http://stackoverflow.com/a/20007730
 ordinal = lambda n: "%d%s" % (n,"tsnrhtdd"[(n/10%10!=1)*(n%10<4)*n%10::4])
 
 
-def plot_trace(x, time_max=None, time_offset=0.,
-               mark_changepoints=True, **plot_kwargs):
+def plot_trace(x, time_max=None, time_offset=0., mark_changepoints=True, **plot_kwargs):
     times, vals = x
     time_max = time_max if time_max else times[-1] + 1
 
@@ -46,15 +46,15 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
     num_frames = len(z)
     warmup = warmup if warmup is not None else len(samples) // 2
     zR, zG = z.T
-    samples = samples[warmup:]
+    init_sample, samples = samples[0], samples[warmup:]
 
-    def plot_trace_sample(sample, **kwargs):
+    def plot_trace_sample(sample, color=None, **kwargs):
         x, u, ch2_transform = sample
         time_max = T_cycle * num_frames
 
-        plot_trace(x, time_max, u, color='r', **kwargs)
-        plot_trace(flip(x), time_max, u, color='g', **kwargs)
-        plot_trace(red_to_green(x, ch2_transform), time_max, u, color='lightgreen', **kwargs)
+        plot_trace(x, time_max, u, color=color or 'r', **kwargs)
+        plot_trace(flip(x), time_max, u, color=color or 'g', **kwargs)
+        plot_trace(red_to_green(x, ch2_transform), time_max, u, color=color or 'lightgreen', **kwargs)
 
         plt.xlabel('time (sec)')
         plt.ylabel('inferred latent intensity')
@@ -88,6 +88,7 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
     frames_ylim = plt.ylim()
 
     plt.axes(axs[1])
+    plot_trace(init_sample[0], T_cycle * num_frames, init_sample[1], color='k', linestyle='--')
     for sample in samples[-1::-use_every_k_samples]:
         plot_trace_sample(sample, alpha=0.05)
     plt.ylim(frames_ylim)

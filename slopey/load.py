@@ -19,7 +19,7 @@ def load_data(filepath):
     durations = get('model_durations').ravel()
     start = get('start')
     end = start + sum(durations)
-    translocation_frame_guesses = np.cumsum(durations[:-1])
+    translocation_frame_guesses = np.cumsum(durations[:-1]) + start
     defaults = {'start': start, 'end': end,
                 'translocation_frame_guesses': translocation_frame_guesses}
 

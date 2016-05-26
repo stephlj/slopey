@@ -26,7 +26,7 @@ def run_analysis(
     model_params = prior_params, camera_params
 
     # create initializer function
-    initializer = make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data)
+    initializer = make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, end)
 
     # construct the sampler and run it
     run = model1(model_params, proposal_params, data[start:end], initializer)
