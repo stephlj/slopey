@@ -13,11 +13,10 @@ from util import ensure_2d, interleave
 
 ### util
 
-def fit_ch2_lstsq(data, fudge=1e-2):
+def fit_ch2_lstsq(ch1, ch2, fudge=1e-2):
     flip = lambda x: np.max(x) - x
-    A = np.vstack([flip(data[:,0]), np.ones_like(data[:,0])]).T
-    B = data[:,1]
-    a, b = scipy.optimize.nnls(A, B)[0]
+    A = np.vstack([flip(ch1), np.ones_like(ch1)]).T
+    a, b = scipy.optimize.nnls(A, ch2)[0]
     return max(a, fudge), max(b, fudge)
 
 
@@ -27,15 +26,23 @@ def make_prior_initializer(num_slopey, T_cycle):
     return lambda: prior_sample(num_slopey, T_cycle)
 
 
-def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, translocation_duration=0.2):
-    translocation_times = translocation_frame_guesses * T_cycle
+def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, end, translocation_duration=0.2):
+    # TODO make translocation_duration fudge a parameter, or depend on prior
+
+    # compute translocation times from translocation_frame_guesses
+    translocation_times = (translocation_frame_guesses - start) * T_cycle
     times = interleave(translocation_times - translocation_duration / 2,
                        translocation_times + translocation_duration / 2)
-    idx = np.concatenate(((0,), translocation_frame_guesses, (-1,)))
-    vals = np.array([np.mean(data[start:end, 0])
-                     for start, end in zip(idx[:-1], idx[1:])])
-    a, b = fit_ch2_lstsq(data)
-    return lambda: ((times, vals), T_cycle * npr.uniform(), (a, b))
+
+    # compute a corresponding set of vals by averaging over data
+    idx = np.concatenate(((start,), translocation_frame_guesses, (end,)))
+    ch1_vals =   np.array([np.mean(data[start:end, 0]) for start, end in zip(idx[:-1], idx[1:])])
+    ch2_vals = np.array([np.mean(data[start:end, 1]) for start, end in zip(idx[:-1], idx[1:])])
+
+    # compute a ch2 transform
+    a, b = fit_ch2_lstsq(ch1_vals, ch2_vals)
+
+    return lambda: ((times, ch1_vals), T_cycle * npr.uniform(), (a, b))
 
 
 ### models paired with inference algorithms
