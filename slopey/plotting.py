@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from camera_model import flip, red_to_green
 from util import interleave
+from priors import make_prior, gamma_log_density
 
 # TODO these time axes might be off by one T_cycle
 
@@ -33,6 +34,22 @@ def plot_trace(x, time_max=None, time_offset=0., mark_changepoints=True, **plot_
     plt.ylim(0., np.max(ys) + 1.)
     plt.xlim(0., time_max - time_offset)
 
+def plot_trace_sample(sample, T_cycle, num_frames, color=None,
+                      plot_red=True, plot_green=True, **kwargs):
+    x, u, ch2_transform = sample
+    time_max = T_cycle * num_frames
+
+    if plot_red:
+        plot_trace(x, time_max, u, color=color or 'r', **kwargs)
+
+    if plot_green:
+        # plot_trace(flip(x), time_max, u, color=color or 'g', **kwargs)
+        plot_trace(red_to_green(x, ch2_transform), time_max, u,
+                   color=color or 'lightgreen', **kwargs)
+
+    plt.xlabel('time (sec)')
+    plt.ylabel('inferred latent intensity')
+
 
 def plot_frames(seq, colorstr):
     ns = range(1, len(seq) + 1)
@@ -47,17 +64,6 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
     warmup = warmup if warmup is not None else len(samples) // 2
     zR, zG = z.T
     init_sample, samples = samples[0], samples[warmup:]
-
-    def plot_trace_sample(sample, color=None, **kwargs):
-        x, u, ch2_transform = sample
-        time_max = T_cycle * num_frames
-
-        plot_trace(x, time_max, u, color=color or 'r', **kwargs)
-        plot_trace(flip(x), time_max, u, color=color or 'g', **kwargs)
-        plot_trace(red_to_green(x, ch2_transform), time_max, u, color=color or 'lightgreen', **kwargs)
-
-        plt.xlabel('time (sec)')
-        plt.ylabel('inferred latent intensity')
 
     def plot_duration_samples(samples):
         from scipy.stats import gaussian_kde
@@ -90,7 +96,7 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
     plt.axes(axs[1])
     plot_trace(init_sample[0], T_cycle * num_frames, init_sample[1], color='k', linestyle='--')
     for sample in samples[-1::-use_every_k_samples]:
-        plot_trace_sample(sample, alpha=0.05)
+        plot_trace_sample(sample, T_cycle, num_frames, alpha=0.05)
     plt.ylim(frames_ylim)
 
     plt.axes(axs[2])
@@ -139,3 +145,31 @@ def make_animation_callback(z, T_cycle):
         fig.canvas.blit(ax.bbox)
 
     return callback
+
+
+def plot_prior(prior_params, T_cycle, num_frames, num_slopey, num_samples):
+    (_, slopey_time_hypers, flat_time_hypers), _ = prior_params
+    _, prior_sample = make_prior(prior_params)
+    fig, ((red_ax, green_ax), (flat_ax, slopey_ax)) = plt.subplots(2, 2, figsize=(16,6))
+
+    red_ax.set_title('red channel prior samples')
+    green_ax.set_title('green channel prior samples')
+    for _ in xrange(num_samples):
+        sample = prior_sample(num_slopey, T_cycle)
+        plt.axes(red_ax)
+        plot_trace_sample(sample, T_cycle, num_frames, plot_green=False)
+        plt.axes(green_ax)
+        plot_trace_sample(sample, T_cycle, num_frames, plot_red=False)
+
+
+    flat_ax.set_title('flat time prior density')
+    plt.axes(flat_ax)
+    t = np.linspace(0.01, 10, 1000)
+    plt.plot(t, np.exp(gamma_log_density(t, flat_time_hypers, sum=False)))
+    plt.xlabel('time (sec)')
+
+    slopey_ax.set_title('slopey time prior density')
+    plt.axes(slopey_ax)
+    t = np.linspace(0.01, 2, 1000)
+    plt.plot(t, np.exp(gamma_log_density(t, slopey_time_hypers, sum=False)))
+    plt.xlabel('time (sec)')

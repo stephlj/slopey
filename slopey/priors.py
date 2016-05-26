@@ -9,11 +9,11 @@ from util import interleave
 
 ### primitive distributions
 
-def beta_log_density(x, params):
+def beta_log_density(x, params, sum=True):
     alpha, beta = params
     logprobs = (alpha - 1) * np.log(x) + (beta - 1) * np.log(1-x) \
         - betaln(alpha, beta)
-    return np.sum(logprobs)
+    return np.sum(logprobs) if sum else logprobs
 
 
 def beta_sample(params, size=None):
@@ -21,10 +21,10 @@ def beta_sample(params, size=None):
     return np.clip(npr.beta(alpha, beta, size=size), 1e-6, 1. - 1e-6)
 
 
-def gamma_log_density(x, params):
+def gamma_log_density(x, params, sum=True):
     alpha, beta = params
     logprobs = alpha * np.log(beta) - gammaln(alpha) + (alpha-1)*np.log(x) - beta*x
-    return np.sum(logprobs)
+    return np.sum(logprobs) if sum else logprobs
 
 
 def gamma_sample(params, size=None):

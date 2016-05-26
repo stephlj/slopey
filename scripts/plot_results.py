@@ -4,8 +4,9 @@ import numpy.random as npr
 import sys
 import cPickle as pickle
 import matplotlib.pyplot as plt
+from os.path import splitext
 
-from slopey.plotting import plot_samples
+from slopey.plotting import plot_samples, plot_prior
 
 
 if __name__ == "__main__":
@@ -20,8 +21,14 @@ if __name__ == "__main__":
 
     params, samples, data = results['params'], results['samples'], results['data']
     T_cycle, start, end = params['T_cycle'], params['start'], params['end']
+    prior_params = (params['intensity_hypers'], params['slopey_time_hypers'],
+                    params['flat_time_hypers']), params['ch2_transform_hypers']
 
     npr.seed(0)
-    plot_samples(samples, data[start:end], T_cycle, warmup=len(samples)//2)
 
+    plot_samples(samples, data[start:end], T_cycle, warmup=len(samples)//2)
     plt.savefig(outfile)
+
+    plot_prior(prior_params, T_cycle, len(data[start:end]), num_slopey=2, num_samples=20)
+    basename, ext = splitext(outfile)
+    plt.savefig(basename + '_prior' + ext)
