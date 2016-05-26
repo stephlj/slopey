@@ -11,6 +11,8 @@ from plotting import make_animation_callback
 from util import ensure_2d, interleave
 
 
+### util
+
 def fit_ch2_lstsq(data, fudge=1e-2):
     flip = lambda x: np.max(x) - x
     A = np.vstack([flip(data[:,0]), np.ones_like(data[:,0])]).T
@@ -18,6 +20,8 @@ def fit_ch2_lstsq(data, fudge=1e-2):
     a, b = scipy.optimize.nnls(A, B)[0]
     return max(a, fudge), max(b, fudge)
 
+
+### initializers
 
 def make_prior_initializer(num_slopey, T_cycle):
     return lambda: prior_sample(num_slopey, T_cycle)
@@ -33,6 +37,8 @@ def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, translo
     a, b = fit_ch2_lstsq(data)
     return lambda: ((times, vals), T_cycle * npr.uniform(), (a, b))
 
+
+### models paired with inference algorithms
 
 def model1(model_params, proposal_params, data, initializer, animate=False):
     prior_params, camera_params = model_params
