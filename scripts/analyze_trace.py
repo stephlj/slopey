@@ -50,9 +50,12 @@ if __name__ == "__main__":
     params = merge_dicts(defaults, load_params(global_paramfile),
                          load_params(specific_paramfile) if specific_paramfile else {})
 
-    if params.get('discard', False):
-        print '...skipping {}'.format(datafile)
-        sys.exit(0)
+    if 'discard' in params:
+        if params['discard']:
+            print '...skipping {}'.format(datafile)
+            sys.exit(0)
+        else:
+            del params['discard']
 
     npr.seed(0)
     samples = run_analysis(data, **params)
