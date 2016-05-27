@@ -1,5 +1,3 @@
-### configuration
-
 # input files
 FILES = $(wildcard data/*.mat)
 
@@ -12,13 +10,14 @@ GLOBALPARAMS = data/params.yml
 
 # these variales set up dependencies on the library files, so that analysis
 # or plotting can be re-run when library functions change
-ANALYSIS_LIB = $(addprefix slopey/, load.py analysis.py camera_model.py \
+ROOT = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+export PYTHONPATH := $(ROOT):$(PYTHONPATH)
+LIB = $(ROOT)/slopey
+SCRIPTS = $(ROOT)/scripts
+ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py \
                                     noise_models.py priors.py samplers.py util.py)
-PLOTTING_LIB = $(addprefix slopey/, load.py plotting.py util.py)
+PLOTTING_LIB = $(addprefix $(LIB)/, load.py plotting.py util.py)
 
-### end configuration
-
-export PYTHONPATH = .
 NAMES = $(notdir $(FILES))
 RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.pkl))
 FIGURES = $(addprefix $(FIGDIR)/, $(NAMES:.mat=.pdf))
@@ -30,15 +29,15 @@ all: $(ALL)
 clean: ; rm -f $(ALL)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: scripts/analyze_trace.py data/%.mat $(GLOBALPARAMS) \
+$(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py data/%.mat $(GLOBALPARAMS) \
                              $$(wildcard data/%.params.yml) $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
-	python $(filter-out slopey/%, $^) $@
+	python $(filter-out $(LIB)/%, $^) $@
 
-$(FIGDIR)/%.pdf: scripts/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
+$(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
-	python $(filter-out slopey/%, $^) $@
+	python $(filter-out $(LIB)/%, $^) $@
 
-$(MATFILE): scripts/collect_results.py $(RESULTS)
+$(MATFILE): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
-	python scripts/collect_results.py $(RESULTSDIR) $@
+	python $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
