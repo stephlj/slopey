@@ -2,8 +2,8 @@
 FILES = $(wildcard data/*.mat)
 
 # output directories
-RESULTSDIR = results
-FIGDIR = figures
+RESULTSDIR = results_slopey
+FIGDIR = figures_slopey
 
 # global parameters file with default configuration
 GLOBALPARAMS = data/params.yml
