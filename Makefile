@@ -1,16 +1,17 @@
 # input files
-FILES = $(wildcard data/*.mat)
+FILES = $(wildcard *.mat)
 
 # output directories
 RESULTSDIR = results_slopey
 FIGDIR = figures_slopey
 
 # global parameters file with default configuration
-GLOBALPARAMS = data/params.yml
+GLOBALPARAMS = params.yml
 
 # these variales set up dependencies on the library files, so that analysis
 # or plotting can be re-run when library functions change
-ROOT = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+# Luke: abspath used to be realpath, but realpath resolves symlinks
+ROOT = $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 export PYTHONPATH := $(ROOT):$(PYTHONPATH)
 LIB = $(ROOT)/slopey
 SCRIPTS = $(ROOT)/scripts
@@ -29,8 +30,8 @@ all: $(ALL)
 clean: ; rm -f $(ALL)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py data/%.mat $(GLOBALPARAMS) \
-                             $$(wildcard data/%.params.yml) $(ANALYSIS_LIB)
+$(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py %.mat $(GLOBALPARAMS) \
+                             $$(wildcard %.params.yml) $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
 	python $(filter-out $(LIB)/%, $^) $@
 
