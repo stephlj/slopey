@@ -1,5 +1,7 @@
 % function EditYAMLfile(filename,paramname,paramvalue)
 %
+% For interfacing with Matt's slopey code.
+% 
 % Steph 4/2016
 
 function EditYAMLfile(filename,paramname,paramvalue)
@@ -32,10 +34,15 @@ function EditYAMLfile(filename,paramname,paramvalue)
         fields = fieldnames(new_params);
         output = '';
         for p = 1:length(fields)
-            if p==length(fields)
-                output = [output,fields{p},':',' ',num2str(new_params.(fields{p}))];
+            if ischar(new_params.(fields{p}))
+                param_val = new_params.(fields{p});
             else
-                output = [output,fields{p},':',' ',num2str(new_params.(fields{p})),sprintf('\n')];
+                param_val = num2str(new_params.(fields{p}));
+            end
+            if p==length(fields)
+                output = [output,fields{p},':',' ',param_val];
+            else
+                output = [output,fields{p},':',' ',param_val,sprintf('\n')];
             end
         end
         f = fopen(name,'w');
@@ -43,10 +50,18 @@ function EditYAMLfile(filename,paramname,paramvalue)
         fclose(f);
     end
 
+    % Read in current params file, if it exists, and turn it into a Matlab
+    % struct
     old = load_yml(filename);
     
-    old.(paramname) = num2str(paramvalue);
+    % Create or overwrite param value
+    if ischar(paramvalue)
+        old.(paramname) = paramvalue;
+    else
+        old.(paramname) = num2str(paramvalue);
+    end
     
+    % Write back to YAML file
     write_yml(filename,old);
     
 end

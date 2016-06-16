@@ -4,7 +4,7 @@ import numpy.random as npr
 import sys
 import cPickle as pickle
 import matplotlib.pyplot as plt
-from os.path import splitext
+from os.path import splitext, isfile
 
 from slopey.plotting import plot_samples, plot_prior
 
@@ -15,6 +15,10 @@ if __name__ == "__main__":
     else:
         print >>sys.stderr, '{} results.pkl out.pdf'.format(sys.argv[0])
         sys.exit(1)
+
+    if not isfile(resultsfile):
+        print '...skipping {}'.format(resultsfile)
+        sys.exit(0)
 
     with open(resultsfile) as infile:
         results = pickle.load(infile)

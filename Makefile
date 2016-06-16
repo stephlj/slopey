@@ -1,5 +1,5 @@
 # input files
-FILES = $(wildcard *.mat)
+FILES = $(wildcard *Results.mat)
 
 # output directories
 RESULTSDIR = results_slopey
@@ -24,6 +24,9 @@ RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.pkl))
 FIGURES = $(addprefix $(FIGDIR)/, $(NAMES:.mat=.pdf))
 MATFILE = $(addprefix $(RESULTSDIR)/, all_results.mat)
 ALL = $(RESULTS) $(FIGURES) $(MATFILE)
+
+#$(info $$FILES is [${FILES}])
+#$(info $$MATFILE is [${MATFILE}])
 
 .PHONY: all clean
 all: $(ALL)

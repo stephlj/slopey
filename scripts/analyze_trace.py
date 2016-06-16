@@ -17,7 +17,7 @@ def run_analysis(
         data, start, end, translocation_frame_guesses,
         num_iterations, proposal_params,
         intensity_hypers, slopey_time_hypers, flat_time_hypers, ch2_transform_hypers,
-        T_cycle, T_blank, noise_sigmasq, **kwargs):
+        T_cycle, T_blank, noise_sigmasq):
 
     # concatenate hyperparameters, make gaussian observation model
     trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
