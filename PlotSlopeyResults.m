@@ -7,10 +7,11 @@
 %
 % Steph 4/2016
 
-function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze)
+function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze,discard)
 
 if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will plot the results of the last samples_to_plot iterations
 if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
+if ~exist('discard','var') discard = 'false'; end
 
     % Given red intensities and the fit parameters for green channel,
     % return non-idealized green
@@ -42,47 +43,54 @@ if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will ke
     % QUESTION: Do I need to concern myself with the offset parameter?
     
     subplot('Position',[0.1 .6 .85 .35])
-    plot(xvectData,input_struct.data(:,1),'xr')
-    hold on
+    if ~strcmpi(discard,'true')
+        plot(xvectData,input_struct.data(:,1),'xr')
+        hold on
+        plot(xvectData,input_struct.data(:,2),'xg')
+        for b = 0:samples_to_plot-1
+            times = input_struct.times(end-b,:)+start_time;
+            vals = input_struct.vals(end-b,:);
+            max_red = max(vals);
+            for kk = 1:length(times)
+                curr_time = times(kk);
+                curr_red = vals(floor(kk/2)+1);
+                curr_green = redtogreen(curr_red,...
+                    max_red,input_struct.ch2_transform(end-b,1),input_struct.ch2_transform(end-b,2));
+                if kk>1
+                    prev_time = times(kk-1);
+                    prev_red = vals(floor((kk-1)/2)+1);
+                    prev_green = redtogreen(prev_red,...
+                        max_red,input_struct.ch2_transform(end-b,1),input_struct.ch2_transform(end-b,2));
+                end
+
+                plot(curr_time,curr_red,'ob')
+                plot(curr_time,curr_green,'ok')
+                if kk==1
+                    plot([start_time,curr_time],[curr_red, curr_red],'--b')
+                    plot([start_time,curr_time],[curr_green, curr_green],'--k')
+                elseif kk == length(times)
+                    plot([prev_time,curr_time],[prev_red curr_red],'--b')
+                    plot([prev_time,curr_time],[prev_green,curr_green],'--k')
+                    plot([curr_time,end_time],[curr_red curr_red],'--b')
+                    plot([curr_time,end_time],[curr_green curr_green],'--b')
+                else
+                    plot([prev_time,curr_time],[prev_red curr_red],'--k')
+                    plot([prev_time,curr_time],[prev_green,curr_green],'--k')
+                end
+
+            end
+            clear times vals max_red
+        
+        end
+    else
+        plot(xvectData,input_struct.data(:,1),'xk')
+        hold on
+        plot(xvectData,input_struct.data(:,2),'xk')
+    end
     title(input_struct.name,'Fontsize',14,'Interpreter','none')
     set(gca,'Fontsize',12)
     xlabel('Time (sec)','Fontsize',14)
     ylabel('Intensity (a.u.)','Fontsize',14)
-    plot(xvectData,input_struct.data(:,2),'xg')
-    for b = 0:samples_to_plot-1
-        times = input_struct.times(end-b,:)+start_time;
-        vals = input_struct.vals(end-b,:);
-        max_red = max(vals);
-        for kk = 1:length(times)
-            curr_time = times(kk);
-            curr_red = vals(floor(kk/2)+1);
-            curr_green = redtogreen(curr_red,...
-                max_red,input_struct.ch2_transform(end-b,1),input_struct.ch2_transform(end-b,2));
-            if kk>1
-                prev_time = times(kk-1);
-                prev_red = vals(floor((kk-1)/2)+1);
-                prev_green = redtogreen(prev_red,...
-                    max_red,input_struct.ch2_transform(end-b,1),input_struct.ch2_transform(end-b,2));
-            end
-            
-            plot(curr_time,curr_red,'ob')
-            plot(curr_time,curr_green,'ok')
-            if kk==1
-                plot([start_time,curr_time],[curr_red, curr_red],'--b')
-                plot([start_time,curr_time],[curr_green, curr_green],'--k')
-            elseif kk == length(times)
-                plot([prev_time,curr_time],[prev_red curr_red],'--b')
-                plot([prev_time,curr_time],[prev_green,curr_green],'--k')
-                plot([curr_time,end_time],[curr_red curr_red],'--b')
-                plot([curr_time,end_time],[curr_green curr_green],'--b')
-            else
-                plot([prev_time,curr_time],[prev_red curr_red],'--k')
-                plot([prev_time,curr_time],[prev_green,curr_green],'--k')
-            end
-                
-        end
-        clear times vals max_red
-    end
     xlim([max(0,start_time-10) min(end_time+10,length(xvectData))])
     hold off
     

@@ -50,7 +50,7 @@ all_third_duration = [];
 
 k=1;
 disp(',: back one trace; .: forward; s: change _s_tart crop; e: change _e_nd crop')
-disp('n: change _n_umber of slopey bits')
+disp('n: change _n_umber of slopey bits; d: _d_iscard from analysis')
 
 while k <= length(names)
     currstruct = results{k};
@@ -107,6 +107,14 @@ while k <= length(names)
                         cd(codedir)
                         results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
                     end
+                    cc=13;
+                elseif cc=='d'
+                    EditYAMLfile(fullfile(maindir,strcat(currstruct.name,'.params.yml')),'discard','true');
+                    cd(symdir)
+                    system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
+                    cd(codedir)
+                    PlotSlopeyResults(currstruct,samples_to_plot,perc_dur_to_analyze,'true');
+                    results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
                     cc=13;
                 % Don't let extra "enters" build up:
                 elseif isequal(cc,char(13)) %13 is the ascii code for the return key
