@@ -1,5 +1,6 @@
 # input files
 FILES = $(wildcard *Results.mat)
+SPECIFIC_PARAMS = $(wildcard *Results.params.yml)
 
 # output directories
 RESULTSDIR = results_slopey
@@ -24,13 +25,19 @@ RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.pkl))
 FIGURES = $(addprefix $(FIGDIR)/, $(NAMES:.mat=.pdf))
 MATFILE = $(addprefix $(RESULTSDIR)/, all_results.mat)
 ALL = $(RESULTS) $(FIGURES) $(MATFILE)
+DISCARD = $(shell $(ROOT)/list_discards.py $(SPECIFIC_PARAMS))
+DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
+# DISCARD_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=.pdf))
+# DISCARD_PRIOR_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=_prior.pdf))
 
 #$(info $$FILES is [${FILES}])
 #$(info $$MATFILE is [${MATFILE}])
 
-.PHONY: all clean
+.PHONY: all clean clean_discards
 all: $(ALL)
 clean: ; rm -f $(ALL)
+clean_discards:
+	rm -f $(DISCARD_PKL) $(MATFILE)
 
 .SECONDEXPANSION:
 $(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py %.mat $(GLOBALPARAMS) \

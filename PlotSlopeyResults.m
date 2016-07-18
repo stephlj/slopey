@@ -1,4 +1,4 @@
-% function PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze)
+% function PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze,discard)
 %
 % Given the slopey analysis results for one trace, plots the results of the last
 % samples_to_plot iterations on top of the raw data, and histograms the
@@ -7,7 +7,8 @@
 %
 % Steph 4/2016
 
-function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze,discard)
+function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,...
+    samples_to_plot,perc_dur_to_analyze,discard)
 
 if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will plot the results of the last samples_to_plot iterations
 if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations

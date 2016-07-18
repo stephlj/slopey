@@ -111,6 +111,7 @@ while k <= length(names)
                 elseif cc=='d'
                     EditYAMLfile(fullfile(maindir,strcat(currstruct.name,'.params.yml')),'discard','true');
                     cd(symdir)
+                    system(strcat(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze),' clean_discards'));
                     system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                     cd(codedir)
                     PlotSlopeyResults(currstruct,samples_to_plot,perc_dur_to_analyze,'true');
