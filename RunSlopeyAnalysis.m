@@ -114,7 +114,6 @@ while k <= length(names)
                     system(strcat(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze),' clean_discards'));
                     system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                     cd(codedir)
-                    PlotSlopeyResults(currstruct,samples_to_plot,perc_dur_to_analyze,'true');
                     results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
                     cc=13;
                 % Don't let extra "enters" build up:
