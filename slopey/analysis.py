@@ -27,7 +27,7 @@ def make_prior_initializer(num_slopey, T_cycle):
 
 
 def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, end, translocation_duration=0.2):
-    # TODO make translocation_duration fudge a parameter, or depend on prior
+    translocation_frame_guesses = np.asarray(translocation_frame_guesses)
 
     # compute translocation times from translocation_frame_guesses
     translocation_times = (translocation_frame_guesses - start) * T_cycle
@@ -40,6 +40,7 @@ def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, 
     ch2_vals = np.array([np.mean(data[start:end, 1]) for start, end in zip(idx[:-1], idx[1:])])
 
     # compute a ch2 transform
+    import ipdb; ipdb.set_trace()
     a, b = fit_ch2_lstsq(ch1_vals, ch2_vals)
 
     return lambda: ((times, ch1_vals), T_cycle * npr.uniform(), (a, b))
