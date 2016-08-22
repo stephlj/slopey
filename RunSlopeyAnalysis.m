@@ -50,7 +50,7 @@ all_third_duration = [];
 
 k=1;
 disp(',: back one trace; .: forward; s: change _s_tart crop; e: change _e_nd crop')
-disp('n: change _n_umber of slopey bits; d: _d_iscard from analysis')
+disp('n: change _n_umber of slopey bits; i: change _i_nitialization; d: _d_iscard from analysis')
 
 while k <= length(names)
     currstruct = results{k};
@@ -98,10 +98,26 @@ while k <= length(names)
                         disp('Invalid start value')
                     end
                     cc=13;
-                elseif cc=='n'
-                    new_num = round(input('How many slopey bits to find? '));
+                elseif cc=='n' || cc=='i'
+                    if cc=='n'
+                        new_num = round(input('How many slopey bits to find? '));
+                    else
+                        new_num = currstruct.num_slopey;
+                    end
                     if new_num>0
-                        EditYAMLfile(fullfile(maindir,strcat(currstruct.name,'.params.yml')),'num_slopey',new_num);
+                        u = 1;
+                        new_init = zeros(new_num,1);
+                        while u <= new_num
+                            disp(strcat('Click on the approximate middle of slopey bit ',int2str(u)))
+                            [x,~] = ginput(1);
+                            x = round(x*currstruct.fps);
+                            if x>0 && x<size(currstruct.data,1)
+                                new_init(u) = currstruct.start+x;
+                                u = u+1;
+                            end
+                            clear x
+                        end
+                        EditYAMLfile(fullfile(maindir,strcat(currstruct.name,'.params.yml')),'translocation_frame_guesses',new_init);
                         cd(symdir)
                         system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                         cd(codedir)

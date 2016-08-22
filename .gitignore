@@ -1,3 +1,7 @@
 /old
 figures/*.pdf
 results/*
+*.pyc
+*.DS_Store
+data/
+figures/

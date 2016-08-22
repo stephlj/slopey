@@ -8,24 +8,17 @@ function EditYAMLfile(filename,paramname,paramvalue)
 
     % load function
     function old_params = load_yml(name)
+        old_params = struct();
         if exist(name,'file')
             f = fopen(name,'r');
             file_all = fscanf(f,'%c');
-            old_params = struct();
-            if ~isempty(file_all)
-                [starts,ends] = regexpi(file_all,': \d*');
-                index = 1;
-                for p = 1:length(starts)
-                    field = file_all(index:starts(p)-1);
-                    value = file_all(starts(p)+2:ends(p));
-                    old_params.(field) = value;
-                    clear field value
-                    index = ends(p)+2;
+            for line = strsplit(file_all,'\n')
+                splits = regexpi(line,'^(?<field>[a-z_]+):\s+(?<value>.*?)\s*$','names');
+                if ~isempty(splits{1})
+                    old_params.(splits{1}.field) = splits{1}.value;
                 end
             end
             fclose(f);
-        else
-            old_params = struct();
         end
     end
 
@@ -34,11 +27,7 @@ function EditYAMLfile(filename,paramname,paramvalue)
         fields = fieldnames(new_params);
         output = '';
         for p = 1:length(fields)
-            if ischar(new_params.(fields{p}))
-                param_val = new_params.(fields{p});
-            else
-                param_val = num2str(new_params.(fields{p}));
-            end
+            param_val = new_params.(fields{p});
             if p==length(fields)
                 output = [output,fields{p},':',' ',param_val];
             else
@@ -57,6 +46,16 @@ function EditYAMLfile(filename,paramname,paramvalue)
     % Create or overwrite param value
     if ischar(paramvalue)
         old.(paramname) = paramvalue;
+    elseif length(paramvalue) > 1
+        paramvalue_text = '[';
+        for u = 1:length(paramvalue)
+            paramvalue_text = strcat(paramvalue_text,num2str(paramvalue(u)));
+            if u~=length(paramvalue)
+                paramvalue_text = strcat(paramvalue_text,',');
+            end
+        end
+        paramvalue_text = strcat(paramvalue_text,']');
+        old.(paramname) = paramvalue_text;
     else
         old.(paramname) = num2str(paramvalue);
     end
