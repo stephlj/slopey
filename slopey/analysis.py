@@ -33,14 +33,16 @@ def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, 
     translocation_times = (translocation_frame_guesses - start) * T_cycle
     times = interleave(translocation_times - translocation_duration / 2,
                        translocation_times + translocation_duration / 2)
+    if not np.all(times > 0) and np.all(np.diff(times) > 0):
+        raise ValueError('HMM initializer failed at generating time guesses')
 
     # compute a corresponding set of vals by averaging over data
     idx = np.concatenate(((start,), translocation_frame_guesses, (end,)))
-    ch1_vals =   np.array([np.mean(data[start:end, 0]) for start, end in zip(idx[:-1], idx[1:])])
-    ch2_vals = np.array([np.mean(data[start:end, 1]) for start, end in zip(idx[:-1], idx[1:])])
+    block_averages = lambda i: np.array([np.mean(data[start:end, i]) for start, end in zip(idx[:-1], idx[1:])])
+    ch1_vals = np.maximum(1e-3, block_averages(0))
 
     # compute a ch2 transform
-    import ipdb; ipdb.set_trace()
+    ch2_vals = np.maximum(1e-3, block_averages(1))
     a, b = fit_ch2_lstsq(ch1_vals, ch2_vals)
 
     return lambda: ((times, ch1_vals), T_cycle * npr.uniform(), (a, b))
