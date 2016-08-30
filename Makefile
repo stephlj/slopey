@@ -20,7 +20,7 @@ ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py \
                                     noise_models.py priors.py samplers.py util.py)
 PLOTTING_LIB = $(addprefix $(LIB)/, load.py plotting.py util.py)
 
-NAMES = $(notdir $(FILES))
+NAMES = $(sort $(notdir $(FILES)))
 RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.pkl))
 FIGURES = $(addprefix $(FIGDIR)/, $(NAMES:.mat=.pdf))
 MATFILE = $(addprefix $(RESULTSDIR)/, all_results.mat)
@@ -30,25 +30,31 @@ DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
 # DISCARD_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=.pdf))
 # DISCARD_PRIOR_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=_prior.pdf))
 
-#$(info $$FILES is [${FILES}])
-#$(info $$MATFILE is [${MATFILE}])
+PYTHON=python
+# MATLAB=/Applications/MATLAB_R2014b.app/bin/matlab -nodisplay -nosplash -nodesktop -nojvm -r "disp('hi'); quit" > /dev/null
 
-.PHONY: all clean clean_discards
+.PHONY: all clean clean_discards debug
 all: $(ALL)
 clean: ; rm -f $(ALL)
 clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
+debug: PYTHON += -m pdb
+# debug: ANALYSIS_LIB =  # TODO I don't know why this trick didn't work!
+debug: all
 
 .SECONDEXPANSION:
 $(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py %.mat $(GLOBALPARAMS) \
                              $$(wildcard %.params.yml) $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
-	python $(filter-out $(LIB)/%, $^) $@
+	@echo Generating $(notdir $@)
+	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
 
 $(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
-	python $(filter-out $(LIB)/%, $^) $@
+	@echo Generating $(notdir $@)
+	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
 
 $(MATFILE): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
-	python $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
+	@echo Generating $(notdir $@)
+	@$(PYTHON) $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
