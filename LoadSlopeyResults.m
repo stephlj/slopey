@@ -13,13 +13,15 @@ names = dir(fullfile(datadir,'*_Results.mat'));
 results = cell(1,length(names));
 
 for k = 1:length(names)
-    if isfield(results_py,names(k).name(1:end-4))
-        struct_py = results_py.(names(k).name(1:end-4));
+    name_split = strsplit(names(k).name,'.');
+    name_base = name_split{1};
+    if isfield(results_py,name_base)
+        struct_py = results_py.(name_base);
 
         if isfield(struct_py.params,'discard') && strcmpi(struct_py.params.discard,'true')
             results{k}.discard = 'true';
         else
-            results{k}.name = names(k).name(1:end-4);
+            results{k}.name = name_base;
             results{k}.fps = 1/struct_py.params.T_cycle;
             results{k}.data = struct_py.data;
             results{k}.start = double(struct_py.params.start);
