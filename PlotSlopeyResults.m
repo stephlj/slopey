@@ -15,7 +15,7 @@ if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will ke
 if ~exist('discard','var') discard = 'false'; end
 if ~exist('xlims','var') xlims = [0 0]; end
 
-smooth_width = 2;
+smooth_width = 5;
 
     % Given red intensities and the fit parameters for green channel,
     % return non-idealized green
@@ -52,8 +52,8 @@ smooth_width = 2;
         hold on
         plot(xvectData,input_struct.data(:,2),'xg')
         % Update 9/2016: adding a smoothed overlay
-        plot(xvectData,medfilt2(input_struct.data(:,1),[1,smooth_width]),'-r','Linewidth',1)
-        plot(xvectData,medfilt2(input_struct.data(:,2),[1,smooth_width]),'-g','Linewidth',1)
+        plot(xvectData,medfilt2(input_struct.data(:,1),[smooth_width,1]),'-r','Linewidth',1)
+        plot(xvectData,medfilt2(input_struct.data(:,2),[smooth_width,1]),'-g','Linewidth',1)
         for b = 0:samples_to_plot-1
             times = input_struct.times(end-b,:)+start_time;
             vals = input_struct.vals(end-b,:);
