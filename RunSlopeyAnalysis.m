@@ -51,13 +51,17 @@ all_third_duration = [];
 k=1;
 disp(',: back one trace; .: forward; s: change _s_tart crop; e: change _e_nd crop')
 disp('n: change _n_umber of slopey bits; i: change _i_nitialization; d: _d_iscard from analysis')
+disp('z: _z_oom; u: _u_nzoom')
+
+xlims=[0,0];
 
 while k <= length(names)
     currstruct = results{k};
     
     if ~isfield(results{k},'discard') || (isfield(results{k},'discard') && ~strcmpi(results{k}.discard,'true'))
     
-        [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,samples_to_plot,perc_dur_to_analyze);
+        [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,...
+            samples_to_plot,perc_dur_to_analyze,'false',xlims);
 
         all_first_duration = [all_first_duration, first_duration];
         all_second_duration = [all_second_duration, second_duration];
@@ -80,7 +84,24 @@ while k <= length(names)
                         k=k-1;
                     end
                     cc=13;
-
+                % Zoom
+                elseif cc=='z'
+                    [x,~] = ginput(2);
+                    x = sort(x);
+                    if x(1)<0
+                        x(1)=1;
+                    end
+                    if round(x(2)*currstruct.fps)>size(currstruct.data,1)
+                        x(2)=round(size(currstruct.data,1)/currstruct.fps);
+                    end
+                    xlims(1) = x(1);
+                    xlims(2) = x(2);
+                    cc=13;
+                % Unzoom
+                elseif cc=='u'
+                    xlims = [0,0];
+                    cc=13;
+                % Change start or end crop
                 elseif cc=='s' || cc=='e'
                     [x,~] = ginput(1);
                     x = round(x*currstruct.fps);
@@ -98,6 +119,7 @@ while k <= length(names)
                         disp('Invalid start value')
                     end
                     cc=13;
+                % Change initialization or num_slopey
                 elseif cc=='n' || cc=='i'
                     if cc=='n'
                         new_num = round(input('How many slopey bits to find? '));
@@ -124,6 +146,7 @@ while k <= length(names)
                         results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
                     end
                     cc=13;
+                % Discard from further analysis
                 elseif cc=='d'
                     EditYAMLfile(fullfile(maindir,strcat(currstruct.name,'.params.yml')),'discard','true');
                     cd(symdir)

@@ -1,4 +1,4 @@
-% function PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze,discard)
+% function PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze,discard,xlims)
 %
 % Given the slopey analysis results for one trace, plots the results of the last
 % samples_to_plot iterations on top of the raw data, and histograms the
@@ -8,11 +8,14 @@
 % Steph 4/2016
 
 function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,...
-    samples_to_plot,perc_dur_to_analyze,discard)
+    samples_to_plot,perc_dur_to_analyze,discard,xlims)
 
 if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will plot the results of the last samples_to_plot iterations
 if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
 if ~exist('discard','var') discard = 'false'; end
+if ~exist('xlims','var') xlims = [0 0]; end
+
+smooth_width = 2;
 
     % Given red intensities and the fit parameters for green channel,
     % return non-idealized green
@@ -23,10 +26,10 @@ if ~exist('discard','var') discard = 'false'; end
     % plot histograms
     function plot_histo(durations,t,subfig_pos)
         subplot('Position',subfig_pos)
-        [n,xout] = hist(durations,[0:.05:2]);
+        [n,xout] = hist(durations,[0:.05:3]);
         n = n./sum(n);
         bar(xout,n)
-        xlim([0 2])
+        xlim([0 3])
         title(t,'Fontsize',14)
         xlabel('Duration (sec)','Fontsize',14)
         ylabel('Frequency','Fontsize',14)
@@ -48,6 +51,9 @@ if ~exist('discard','var') discard = 'false'; end
         plot(xvectData,input_struct.data(:,1),'xr')
         hold on
         plot(xvectData,input_struct.data(:,2),'xg')
+        % Update 9/2016: adding a smoothed overlay
+        plot(xvectData,medfilt2(input_struct.data(:,1),[1,smooth_width]),'-r','Linewidth',1)
+        plot(xvectData,medfilt2(input_struct.data(:,2),[1,smooth_width]),'-g','Linewidth',1)
         for b = 0:samples_to_plot-1
             times = input_struct.times(end-b,:)+start_time;
             vals = input_struct.vals(end-b,:);
@@ -92,7 +98,11 @@ if ~exist('discard','var') discard = 'false'; end
     set(gca,'Fontsize',12)
     xlabel('Time (sec)','Fontsize',14)
     ylabel('Intensity (a.u.)','Fontsize',14)
-    xlim([max(0,start_time-10) min(end_time+10,length(xvectData))])
+    if isequal(xlims,[0 0])
+        xlim([max(0,start_time-10) min(end_time+10,length(xvectData))])
+    else
+        xlim(xlims)
+    end
     hold off
     
     % Now plot the last 10% of the slopey durations:
