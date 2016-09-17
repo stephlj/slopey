@@ -15,7 +15,7 @@ results = cell(1,length(names));
 for k = 1:length(names)
     name_split = strsplit(names(k).name,'.');
     % name_base = name_split{1};
-    % Update 9/2016: savemat in python only allows key names up to 63
+    % Update 9/2016: matlab only allows variable/field names up to 63
     % characters!
     name_base = name_split{1}(1:min(63,length(name_split{1})));
     if isfield(results_py,name_base)
@@ -24,7 +24,8 @@ for k = 1:length(names)
         if isfield(struct_py.params,'discard') && strcmpi(struct_py.params.discard,'true')
             results{k}.discard = 'true';
         else
-            results{k}.name = name_base;
+            % results{k}.name = name_base;
+            results{k}.name = name_split{1};
             results{k}.fps = 1/struct_py.params.T_cycle;
             results{k}.data = struct_py.data;
             results{k}.start = double(struct_py.params.start);

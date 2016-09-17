@@ -33,18 +33,15 @@ DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
 PYTHON=python
 # MATLAB=/Applications/MATLAB_R2014b.app/bin/matlab -nodisplay -nosplash -nodesktop -nojvm -r "disp('hi'); quit" > /dev/null
 
-.PHONY: all clean clean_discards debug
+.PHONY: all clean clean_discards
 all: $(ALL)
 clean: ; rm -f $(ALL)
 clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
-debug: PYTHON += -m pdb
-# debug: ANALYSIS_LIB =  # TODO I don't know why this trick didn't work!
-debug: all
 
 .SECONDEXPANSION:
 $(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py %.mat $(GLOBALPARAMS) \
-                             $$(wildcard %.params.yml) $(ANALYSIS_LIB)
+                             $$(wildcard %.params.yml)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@

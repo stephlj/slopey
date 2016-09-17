@@ -27,7 +27,7 @@ def make_prior_initializer(num_slopey, T_cycle):
 
 
 def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, end, translocation_duration=0.2):
-    translocation_frame_guesses = np.asarray(translocation_frame_guesses)
+    translocation_frame_guesses = np.atleast_1d(translocation_frame_guesses)
 
     # compute translocation times from translocation_frame_guesses
     translocation_times = (translocation_frame_guesses - start) * T_cycle
