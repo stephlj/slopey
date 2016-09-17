@@ -13,8 +13,12 @@ fig_pos = [100,400,900,700];
 figure('Position',fig_pos)
 
 % maindir = '/Users/Steph/Documents/UCSF/Narlikar lab/HMM analysis Slopey/slopey';
-maindir = fullfile('/Users/Steph/Documents/UCSF/Narlikar lab/smFRET data analysis/HMM results',...
-    datadir_to_analyze);
+if strcmpi(datadir_to_analyze,'SlopeyHospital')
+    maindir = fullfile('/Users/Steph/Desktop',datadir_to_analyze);
+else
+    maindir = fullfile('/Users/Steph/Documents/UCSF/Narlikar lab/smFRET data analysis/HMM results',...
+        datadir_to_analyze);
+end
 symdir = '~/Documents/symlink/HMM_analysis_Slopey';
 codedir = cd;
 
@@ -121,7 +125,7 @@ while k <= length(names)
                     cc=13;
                 % Change initialization or num_slopey
                 elseif cc=='n' || cc=='i'
-                    if cc=='n'
+                    if cc=='n' || ~isfield(currstruct,'num_slopey')
                         new_num = round(input('How many slopey bits to find? '));
                     else
                         new_num = currstruct.num_slopey;
