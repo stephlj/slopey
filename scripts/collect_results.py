@@ -6,6 +6,7 @@ import cPickle as pickle
 from glob import glob
 from os.path import join, basename
 from scipy.io import savemat
+from tqdm import tqdm
 
 def load_results(resultsfile):
     with open(resultsfile) as infile:

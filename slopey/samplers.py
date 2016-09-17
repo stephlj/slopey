@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
 import numpy.random as npr
+from tqdm import tqdm
 
 
 def run_mh(init_theta, log_p, proposal_distn, N, callback=None):

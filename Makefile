@@ -40,11 +40,11 @@ clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py %.mat $(GLOBALPARAMS) \
+$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) \
                              $$(wildcard %.params.yml)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
+	@$(PYTHON) $(SCRIPTS)/analyze_trace.py $(filter-out $(LIB)/%, $^) $@
 
 $(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
