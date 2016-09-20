@@ -138,7 +138,7 @@ while k <= length(names)
                             [x,~] = ginput(1);
                             x = round(x*currstruct.fps);
                             if x>0 && x<size(currstruct.data,1)
-                                new_init(u) = currstruct.start+x;
+                                new_init(u) = x;
                                 u = u+1;
                             end
                             clear x
