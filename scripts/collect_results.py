@@ -33,6 +33,6 @@ if __name__ == '__main__':
         print >>sys.stderr, '{} results_directory out.mat'.format(sys.argv[0])
 
     all_files = glob(join(resultsdir, '*.results.pkl'))
-    all_results = dict(load_results(file) for file in all_files)
+    all_results = dict(load_results(file) for file in tqdm(all_files))
 
     savemat(outfile, all_results, long_field_names=True, oned_as='column')

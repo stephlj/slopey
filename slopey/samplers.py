@@ -24,7 +24,7 @@ def run_mh(init_theta, log_p, proposal_distn, N, callback=None):
 
     theta = init_theta
     thetas = []
-    for n in xrange(N):
+    for n in tqdm(xrange(N)):
         theta = step(theta)
         thetas.append(theta)
 
