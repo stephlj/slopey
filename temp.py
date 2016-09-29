@@ -5,37 +5,43 @@ def integrate_affine(slope, x0, y0, a, b):
     y_intercept = y0 - slope * x0
     return 0.5 * slope * (b**2 - a**2)  + y_intercept * (b - a)
 
-def noiseless_measurements(x, u, T, T_cycle, T_blank):
+def noiseless_measurements(x, u, num_frames, T_cycle, T_blank):
     times, vals = map(np.array, x)
-    times += u
+    times = times - u
     K = times.shape[0]
-    out = np.zeros(T)
+    out = np.zeros(num_frames)
 
     # always start on flat
     slopey, slope = 0, 0.
     k, t = 0, 0
-    time, val = times[k], vals[k]
-    while t < T:
-        while t < T and (k >= K or (t+1)*T_cycle < times[k]):
+    time, val = times[0], vals[0]
+    while t < num_frames:
+        while t < num_frames and (k >= K or (t+1)*T_cycle < times[k]):
             out[t] = integrate_affine(
                 slope, time, val, t*T_cycle, (t+1)*T_cycle - T_blank)
             t += 1
 
-        if t < T:
+        # if t == 204:
+        #     import ipdb; ipdb.set_trace()
+        if t < num_frames:
             start = t*T_cycle
-            while k < K and times[k] < (t+1)*T_cycle:
-                out[t] += integrate_affine(slope, time, val, start, times[k])
+            cycle_end = (t+1)*T_cycle
+            shutter_close = cycle_end - T_blank
+            while k < K and times[k] < cycle_end:
+                if start < shutter_close:
+                    out[t] += integrate_affine(
+                        slope, time, val, start, min(times[k], shutter_close))
                 start = times[k]
                 k += 1
                 slopey ^= 1
                 slope = (vals[k-1] - vals[k]) / (times[k-1] - times[k]) \
                     if slopey else 0.
             time, val = times[k-1], vals[k-1]
-            out[t] += integrate_affine(
-                slope, time, val, start, (t+1)*T_cycle - T_blank)
+            if start < shutter_close:
+                out[t] += integrate_affine(slope, time, val, start, shutter_close)
             t += 1
 
-    return out
+    return out / (T_cycle - T_blank)
 
 
 if __name__ == '__main__':
@@ -47,7 +53,7 @@ if __name__ == '__main__':
     T_cycle = 0.1
     T_blank = 0.01
     u = T_cycle / 3.
-    T = 25
+    num_frames = 25
 
-    plt.plot(noiseless_measurements(x, u, T, T_cycle, T_blank))
+    plt.plot(noiseless_measurements(x, u, num_frames, T_cycle, T_blank))
     plt.show()
