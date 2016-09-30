@@ -9,23 +9,34 @@ from util import interleave
 
 ### primitive distributions
 
-def beta_log_density(x, params, sum=True):
-    alpha, beta = params
-    logprobs = (alpha - 1) * np.log(x) + (beta - 1) * np.log(1-x) \
-        - betaln(alpha, beta)
-    return np.sum(logprobs) if sum else logprobs
+beta_negenergy = lambda x, alpha, beta: (alpha-1)*np.log(x) + (beta-1)*np.log(1-x)
+beta_lognormalizer = lambda alpha, beta: betaln(alpha, beta)
 
+gamma_negenergy = lambda x, alpha, beta: (alpha - 1.) * np.log(x) - beta * x
+gamma_lognormalizer = lambda alpha, beta: gammaln(alpha) - alpha * np.log(beta)
+
+def make_densities(negenergy, lognormalizer):
+    def log_density(x, params, sum=True):
+        logprobs = negenergy(x, *params) - lognormalizer(*params)
+        return np.sum(logprobs) if sum else logprobs
+
+    def make_log_density(params):
+        logZ = lognormalizer(*params)
+        def log_density(x, sum=True):
+            logprobs = negenergy(x, *params) - logZ
+            return np.sum(logprobs) if sum else logprobs
+        return log_density
+
+    return log_density, make_log_density
+
+beta_log_density, make_beta_log_density = \
+    make_densities(beta_negenergy, beta_lognormalizer)
+gamma_log_density, make_gamma_log_density = \
+    make_densities(gamma_negenergy, gamma_lognormalizer)
 
 def beta_sample(params, size=None):
     alpha, beta = params
     return np.clip(npr.beta(alpha, beta, size=size), 1e-6, 1. - 1e-6)
-
-
-def gamma_log_density(x, params, sum=True):
-    alpha, beta = params
-    logprobs = alpha * np.log(beta) - gammaln(alpha) + (alpha-1)*np.log(x) - beta*x
-    return np.sum(logprobs) if sum else logprobs
-
 
 def gamma_sample(params, size=None):
     alpha, beta = params
@@ -48,27 +59,29 @@ def integrate_dwelltimes(flat_times, slopey_times):
 
 def make_prior(prior_params):
     trace_params, ch2_transform_params = prior_params
+
     level_params, slopey_time_params, flat_time_params = trace_params
+    logp_levels, logp_slopeytimes, logp_flattimes = \
+        map(make_gamma_log_density, trace_params)
+
+    a_params, b_params = ch2_transform_params
+    logp_ch2transform_a, logp_ch2transform_b = \
+        map(make_gamma_log_density, ch2_transform_params)
+
+    def logp_x(x):
+        # TODO all of these are gammas, can do one call to log
+        times, vals = x
+        flat_times, slopey_times = split_dwelltimes(times)
+        return logp_levels(vals) + logp_slopeytimes(slopey_times) \
+                + logp_flattimes(flat_times)
+
+    def logp_ch2_transform(ch2_transform):
+        a, b = ch2_transform
+        return logp_ch2transform_a(a) + logp_ch2transform_b(b)
 
     def log_prior_density(theta):
         # NOTE: u is assumed uniform and so doesn't contribute
         x, u, ch2_transform = theta
-
-        def logp_x(x):
-            logp_dwelltimes = gamma_log_density
-            logp_levels = gamma_log_density
-
-            times, vals = x
-            flat_times, slopey_times = split_dwelltimes(times)
-            return logp_levels(vals, level_params) \
-                + logp_dwelltimes(slopey_times, slopey_time_params) \
-                + logp_dwelltimes(flat_times, flat_time_params)
-
-        def logp_ch2_transform(ch2_transform):
-            a_params, b_params = ch2_transform_params
-            a, b = ch2_transform
-            return gamma_log_density(a, a_params) + gamma_log_density(b, b_params)
-
         return logp_x(x) + logp_ch2_transform(ch2_transform)
 
     def sample_prior(num_slopey_bits, T_cycle):
