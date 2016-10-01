@@ -47,13 +47,13 @@ def logq_diff(
     cdef double new_a = new_theta[2][0]
     cdef double new_b = new_theta[2][1]
 
-    cdef double times[::1] = np.zeros(K)
-    cdef double new_times[::1] = np.zeros(K)
+    cdef int k, K = raw_times.shape[0]
+    cdef double total = 0.
+
+    cdef double[::1] times = np.zeros(K)
+    cdef double[::1] new_times = np.zeros(K)
     diff(raw_times, times)
     diff(new_raw_times, new_times)
-
-    cdef int k, K = times.shape[0]
-    cdef double total = 0.
 
     # score times
     for k in range(K):
