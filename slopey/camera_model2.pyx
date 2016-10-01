@@ -23,7 +23,7 @@ def noiseless_measurements(
     cdef double[::1] out = np.zeros(num_frames)
     cdef int K = times.shape[0]
 
-    cdef int slopey = 1, k = 0, t = 0
+    cdef int slopey = 0, k = 0, t = 0
     cdef double slope = 0., time = times[0], val = vals[0]
     cdef double start, cycle_end, shutter_close
     while t < num_frames:
@@ -51,4 +51,4 @@ def noiseless_measurements(
                 out[t] += integrate_affine(slope, time, val, start, shutter_close)
             t += 1
 
-        return np.asarray(out) / (T_cycle - T_blank)
+    return np.asarray(out) / (T_cycle - T_blank)

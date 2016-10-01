@@ -28,6 +28,10 @@ def make_camera_model(camera_params):
         num_frames = z.shape[0]
 
         # red channel
+        thing1 = noiseless_measurements(make_integrated_x(x_red), u, num_frames)
+        from camera_model2 import noiseless_measurements as nm2
+        thing2 = nm2(x_red, u, num_frames, T_cycle, T_blank)
+        import ipdb; ipdb.set_trace()
         y_red = noiseless_measurements(make_integrated_x(x_red), u, num_frames)
 
         # green channel
