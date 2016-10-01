@@ -7,8 +7,78 @@
 import numpy as np
 cimport numpy as np
 
+from libc.math cimport log, exp
+
 cdef extern from "gsl/gsl_sf_gamma.h":
     double gsl_sf_lngamma(double x)
+    double gsl_sf_lnbeta(double a, double b)
+
+### acceptance prob
+
+cdef inline double gamma_log_density(double x, double alpha, double beta):
+    return (alpha-1.)*log(x) - beta*x - gsl_sf_lngamma(alpha) + alpha*log(beta)
+
+cdef inline double beta_log_density(double x, double alpha, double beta):
+    return (alpha-1.)*log(x) + (beta-1.)*log(1.-x) - gsl_sf_lnbeta(alpha, beta)
+
+cdef inline void diff(double[::1] a, double[::1] out):
+    cdef int k, K = a.shape[0]
+    out[0] = a[0]
+    for k in range(1, K):
+        out[k] = a[k] - a[k-1]
+
+def logq_diff(
+        # inputs
+        tuple theta, tuple new_theta,
+        # constant needed for scoring u
+        double T_cycle,
+        # proposal scale parameters
+        double u_scale, double ch2_scale,
+        double val_scale, double time_scale):
+    cdef double[::1] raw_times = theta[0][0]
+    cdef double[::1] vals = theta[0][1]
+    cdef double u = theta[1]
+    cdef double a = theta[2][0]
+    cdef double b = theta[2][1]
+
+    cdef double[::1] new_raw_times = new_theta[0][0]
+    cdef double[::1] new_vals = new_theta[0][1]
+    cdef double new_u = new_theta[1]
+    cdef double new_a = new_theta[2][0]
+    cdef double new_b = new_theta[2][1]
+
+    cdef double times[::1] = np.zeros(K)
+    cdef double new_times[::1] = np.zeros(K)
+    diff(raw_times, times)
+    diff(new_raw_times, new_times)
+
+    cdef int k, K = times.shape[0]
+    cdef double total = 0.
+
+    # score times
+    for k in range(K):
+        total += gamma_log_density(times[k], new_times[k] * time_scale, time_scale) \
+               - gamma_log_density(new_times[k], times[k] * time_scale, time_scale)
+
+    # score vals
+    for k in range(K):
+        total += gamma_log_density(vals[k], new_vals[k] * val_scale, val_scale) \
+               - gamma_log_density(new_vals[k], vals[k] * val_scale, val_scale)
+
+    # score ch2
+    total += gamma_log_density(a,     ch2_scale*new_a, ch2_scale) \
+           + gamma_log_density(b,     ch2_scale*new_b, ch2_scale)
+    total -= gamma_log_density(new_a, ch2_scale*a,     ch2_scale) \
+           + gamma_log_density(new_b, ch2_scale*b,     ch2_scale)
+
+    # score u
+    cdef double frac = u / T_cycle, new_frac = new_u / T_cycle
+    total += beta_log_density(frac,     new_frac * u_scale, (1.-new_frac) * u_scale) \
+           - beta_log_density(new_frac,     frac * u_scale,     (1.-frac) * u_scale)
+
+    return total
+
+### camera model
 
 cdef inline double integrate_affine(
         double slope, double x0, double y0, double a, double b):
