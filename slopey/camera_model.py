@@ -6,6 +6,8 @@ from itertools import cycle, chain
 from functools import partial
 from operator import itemgetter
 
+from camera_model2 import noiseless_measurements as noiseless_measurements_fast
+
 
 def flip(x):
     times, vals = x
@@ -28,15 +30,11 @@ def make_camera_model(camera_params):
         num_frames = z.shape[0]
 
         # red channel
-        thing1 = noiseless_measurements(make_integrated_x(x_red), u, num_frames)
-        from camera_model2 import noiseless_measurements as nm2
-        thing2 = nm2(x_red, u, num_frames, T_cycle, T_blank)
-        import ipdb; ipdb.set_trace()
-        y_red = noiseless_measurements(make_integrated_x(x_red), u, num_frames)
+        y_red = noiseless_measurements_fast(x_red, u, num_frames, T_cycle, T_blank)
 
         # green channel
         x_green = red_to_green(x_red, ch2_transform_params)
-        y_green = noiseless_measurements(make_integrated_x(x_green), u, num_frames)
+        y_green = noiseless_measurements_fast(x_green, u, num_frames, T_cycle, T_blank)
 
         # combine the two channels
         y_2ch = np.hstack((y_red[:,None], y_green[:,None]))
