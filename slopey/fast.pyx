@@ -78,6 +78,63 @@ def logq_diff(
 
     return total
 
+cdef inline double gamma_negenergy(double x, double alpha, double beta):
+    return (alpha-1.)*log(x) - beta*x
+
+def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
+    cdef double[::1] raw_times = theta[0][0]
+    cdef double[::1] vals = theta[0][1]
+    cdef double u = theta[1]
+    cdef double a = theta[2][0]
+    cdef double b = theta[2][1]
+
+    cdef double[::1] new_raw_times = new_theta[0][0]
+    cdef double[::1] new_vals = new_theta[0][1]
+    cdef double new_u = new_theta[1]
+    cdef double new_a = new_theta[2][0]
+    cdef double new_b = new_theta[2][1]
+
+    cdef double level_alpha = prior_params[0][0][0], \
+                level_beta  = prior_params[0][0][1], \
+                slopey_time_alpha = prior_params[0][1][0], \
+                slopey_time_beta  = prior_params[0][1][1], \
+                flat_time_alpha = prior_params[0][2][0], \
+                flat_time_beta = prior_params[0][2][1], \
+                a_alpha = prior_params[1][0][0], \
+                a_beta  = prior_params[1][0][1], \
+                b_alpha = prior_params[1][1][0], \
+                b_beta  = prior_params[1][1][1]
+
+    cdef int k, K = raw_times.shape[0]
+    cdef double total = 0.
+
+    cdef double[::1] times = np.zeros(K)
+    cdef double[::1] new_times = np.zeros(K)
+    diff(raw_times, times)
+    diff(new_raw_times, new_times)
+
+    # score times
+    for k in range(0,K,2):
+        total += gamma_negenergy(new_times[k],   flat_time_alpha,   flat_time_beta) \
+               - gamma_negenergy(times[k],       flat_time_alpha,   flat_time_beta)
+        total += gamma_negenergy(new_times[k+1], slopey_time_alpha, slopey_time_beta) \
+               - gamma_negenergy(times[k+1],     slopey_time_alpha, slopey_time_beta)
+
+    # score vals
+    for k in range(K):
+        total += gamma_negenergy(new_vals[k], level_alpha, level_beta) \
+               - gamma_negenergy(vals[k],     level_alpha, level_beta)
+
+    # score ch2
+    total += gamma_negenergy(new_a, a_alpha, a_beta) \
+           - gamma_negenergy(a,     a_alpha, a_beta)
+    total += gamma_negenergy(new_b, b_alpha, b_beta) \
+           - gamma_negenergy(b,     b_alpha, b_beta)
+
+    # NOTE: we don't score u because we assume the prior is uniform
+
+    return total
+
 ### camera model
 
 cdef inline double integrate_affine(

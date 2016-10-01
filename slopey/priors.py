@@ -5,6 +5,7 @@ from scipy.special import gammaln, betaln
 import matplotlib.pyplot as plt
 
 from util import interleave
+from fast import logp_diff as logp_diff_fast
 
 
 ### primitive distributions
@@ -69,7 +70,6 @@ def make_prior(prior_params):
         map(make_gamma_log_density, ch2_transform_params)
 
     def logp_x(x):
-        # TODO all of these are gammas, can do one call to log
         times, vals = x
         flat_times, slopey_times = split_dwelltimes(times)
         return logp_levels(vals) + logp_slopeytimes(slopey_times) \
@@ -109,4 +109,7 @@ def make_prior(prior_params):
 
         return x, u, ch2_transform
 
-    return log_prior_density, sample_prior
+    def logp_diff(theta, new_theta):
+        return logp_diff_fast(theta, new_theta, prior_params)
+
+    return logp_diff, log_prior_density, sample_prior

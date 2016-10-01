@@ -56,12 +56,21 @@ def model1(model_params, proposal_params, data, initializer, animate=False):
     T_cycle, _, _ = camera_params
 
     # build the model densities, a prior and a likelihood
-    log_prior_density, prior_sample = make_prior(prior_params)
+    log_prior_diff, log_prior_density, prior_sample = make_prior(prior_params)
     camera_loglike = make_camera_model(camera_params)
 
     # define the joint distribution as the prior times the likelihood
     def log_p(theta):
         return camera_loglike(data, theta) + log_prior_density(theta)
+
+    # TODO don't want to have to define this here! there should be no new_theta
+    # here. put camera_loglike into cython, so then this whole logjoint_diff
+    # function can be cythonized
+    def logp_diff(theta, new_theta):
+        return log_prior_diff(theta, new_theta) \
+            + camera_loglike(data, new_theta) - camera_loglike(data, theta)
+
+    joint_distn = (logp_diff, log_p)
 
     # set up inference
     proposal_distn = make_prior_proposer(proposal_params, T_cycle)
@@ -80,7 +89,7 @@ def model1(model_params, proposal_params, data, initializer, animate=False):
     # make a runner function
     samples = [initializer()]
     def run(num_iter):
-        new_samples = run_mh(samples[-1], log_p, proposal_distn, num_iter, callback)
+        new_samples = run_mh(samples[-1], joint_distn, proposal_distn, num_iter, callback)
         samples.extend(new_samples)
         print 'accept proportion: %0.3f' % np.mean(accepts)
         return samples
