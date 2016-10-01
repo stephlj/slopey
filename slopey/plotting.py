@@ -149,7 +149,7 @@ def make_animation_callback(z, T_cycle):
 
 def plot_prior(prior_params, T_cycle, num_frames, num_slopey, num_samples):
     (_, slopey_time_hypers, flat_time_hypers), _ = prior_params
-    _, prior_sample = make_prior(prior_params)
+    prior_sample = make_prior(prior_params)[-1]
     fig, ((red_ax, green_ax), (flat_ax, slopey_ax)) = plt.subplots(2, 2, figsize=(16,6))
 
     red_ax.set_title('red channel prior samples')
