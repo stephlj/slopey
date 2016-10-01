@@ -6,7 +6,7 @@ from itertools import cycle, chain
 from functools import partial
 from operator import itemgetter
 
-from camera_model2 import noiseless_measurements as noiseless_measurements_fast
+from fast import noiseless_measurements as noiseless_measurements_fast
 
 
 def flip(x):
