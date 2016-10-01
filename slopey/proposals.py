@@ -3,6 +3,7 @@ import numpy as np
 
 from priors import split_dwelltimes, integrate_dwelltimes, \
     beta_log_density, beta_sample, gamma_log_density, gamma_sample
+from fast import logq_diff as logq_diff_fast
 
 
 def make_prior_proposer(proposal_params, T_cycle):
@@ -90,4 +91,9 @@ def make_prior_proposer(proposal_params, T_cycle):
 
         return logq_x(new_x, x) + logq_u(new_u, u) + logq_ch2(new_ch2, ch2)
 
-    return logq, propose
+    def logq_diff(theta, new_theta):
+        return logq_diff_fast(
+            theta, new_theta, T_cycle, u_proposal_params, ch2_proposal_params,
+            *trace_proposal_params)
+
+    return logq_diff, logq, propose

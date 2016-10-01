@@ -5,11 +5,10 @@ from tqdm import tqdm
 
 
 def run_mh(init_theta, log_p, proposal_distn, N, callback=None):
-    log_q, propose = proposal_distn
+    logq_diff, log_q, propose = proposal_distn
 
     def log_acceptance_prob(theta, new_theta):
-        score = log_p(new_theta) - log_p(theta) \
-            + log_q(theta, new_theta) - log_q(new_theta, theta)
+        score = log_p(new_theta) - log_p(theta) + logq_diff(theta, new_theta)
         return min(0., score)
 
     def flip_coin(p):
