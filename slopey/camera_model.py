@@ -26,18 +26,12 @@ def make_camera_model(camera_params):
 
     def loglike(z, theta):
         x_red, u, ch2_transform_params = theta
-        assert z.ndim == 2 and z.shape[1] == 2
+        a, b = ch2_transform_params
         num_frames = z.shape[0]
 
-        # red channel
-        y_red = noiseless_measurements_fast(x_red, u, num_frames, T_cycle, T_blank)
-
-        # green channel
-        x_green = red_to_green(x_red, ch2_transform_params)
-        y_green = noiseless_measurements_fast(x_green, u, num_frames, T_cycle, T_blank)
-
-        # combine the two channels
-        y_2ch = np.hstack((y_red[:,None], y_green[:,None]))
+        y_2ch = np.zeros((num_frames, 2))
+        y_2ch[:,0] = noiseless_measurements_fast(x_red, u, num_frames, T_cycle, T_blank)
+        y_2ch[:,1] = -a * y_2ch[:,0] + (b + a * np.max(x_red[1]))
 
         return noise_loglike(y_2ch, z)
 
