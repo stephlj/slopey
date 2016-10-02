@@ -1,5 +1,6 @@
 from __future__ import division
 import numpy as np
+import os
 
 from priors import split_dwelltimes, integrate_dwelltimes, \
     beta_log_density, beta_sample, gamma_log_density, gamma_sample
@@ -9,7 +10,7 @@ from fast import logq_diff as logq_diff_fast, propose as propose_fast
 def make_prior_proposer(proposal_params, T_cycle):
     trace_proposal_params, u_proposal_params, ch2_proposal_params = proposal_params
 
-    def propose2(theta):
+    def propose_cython(theta):
         return propose_fast(theta, T_cycle, u_proposal_params, ch2_proposal_params,
                             *trace_proposal_params)
 
@@ -101,4 +102,7 @@ def make_prior_proposer(proposal_params, T_cycle):
             theta, new_theta, T_cycle, u_proposal_params, ch2_proposal_params,
             *trace_proposal_params)
 
-    return logq_diff, logq, propose
+    if os.getenv('FAST_SLOPEY_PROPOSALS'):
+        return logq_diff, logq, propose_cython
+    else:
+        return logq_diff, logq, propose
