@@ -23,6 +23,63 @@ cdef extern from "gsl/gsl_randist.h":
     double gamma "gsl_ran_gamma"(gsl_rng * r, double, double)
     double beta "gsl_ran_beta"(gsl_rng * r, double, double)
 
+cdef gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937)
+
+cdef double dmin(double a, double b): return a if a < b else b
+cdef double dmax(double a, double b): return a if a > b else b
+
+### proposals
+
+cdef inline void cumsum(double[::1] a):
+    cdef int k, K = a.shape[0]
+    for k in range(1,K):
+        a[k] +=  a[k-1]
+
+cdef inline double clip(double x, double low, double high):
+    return dmin(dmax(x, low), high)
+
+def propose(
+        # input
+        tuple theta,
+        # constant needed for proposing u
+        double T_cycle,
+        # proposal scale parameters
+        double u_scale, double ch2_scale,
+        double val_scale, double time_scale):
+    cdef double[::1] raw_times = theta[0][0]
+    cdef double[::1] vals = theta[0][1]
+    cdef double u = theta[1]
+    cdef double a = theta[2][0]
+    cdef double b = theta[2][1]
+
+    cdef int K = raw_times.shape[0]
+
+    cdef double[::1] times = np.zeros(K)
+    diff(raw_times, times)
+
+    # propose new times
+    cdef double[::1] new_times = np.zeros(K)
+    for k in range(K):
+        new_times[k] = dmax(1e-6, gamma(r, times[k] * time_scale, 1./time_scale))
+    cumsum(new_times)
+
+    # propose new vals
+    cdef double[::1] new_vals = np.zeros(K)
+    for k in range(K):
+        new_vals[k] = dmax(1e-6, gamma(r, vals[k] * val_scale, 1./val_scale))
+
+    # propose new ch2_transform_params
+    cdef double new_a, new_b
+    new_a = dmax(1e-6, gamma(r, a * ch2_scale, 1./ch2_scale))
+    new_b = dmax(1e-6, gamma(r, b * ch2_scale, 1./ch2_scale))
+
+    # propose new u
+    cdef double frac = u / T_cycle
+    cdef double new_u = T_cycle * clip(beta(r, frac * u_scale, (1.-frac) * u_scale),
+                                       1e-6, 1. - 1e-6)
+
+    return ((np.asarray(new_times), np.asarray(new_vals)), new_u, (new_a, new_b))
+
 ### acceptance prob
 
 cdef inline double gamma_log_density(double x, double alpha, double beta):
@@ -182,7 +239,7 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
             while k < K and times[k] < cycle_end:
                 if start < shutter_close:
                     y_red[t] += scale * integrate_affine(
-                        slope, time, val, start, min(times[k], shutter_close))
+                        slope, time, val, start, dmin(times[k], shutter_close))
                 start = times[k]
                 k += 1
                 slopey ^= 1

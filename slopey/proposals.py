@@ -3,11 +3,15 @@ import numpy as np
 
 from priors import split_dwelltimes, integrate_dwelltimes, \
     beta_log_density, beta_sample, gamma_log_density, gamma_sample
-from fast import logq_diff as logq_diff_fast
+from fast import logq_diff as logq_diff_fast, propose as propose_fast
 
 
 def make_prior_proposer(proposal_params, T_cycle):
     trace_proposal_params, u_proposal_params, ch2_proposal_params = proposal_params
+
+    # def propose(theta):
+    #     return propose_fast(theta, T_cycle, u_proposal_params, ch2_proposal_params,
+    #                         *trace_proposal_params)
 
     def propose(theta):
         x, u, ch2_transform = theta
@@ -51,6 +55,7 @@ def make_prior_proposer(proposal_params, T_cycle):
         new_ch2_transform = propose_ch2_transform(ch2_transform)
 
         return new_x, new_u, new_ch2_transform
+
 
     def logq(new_theta, theta):
         (new_x, new_u, new_ch2), (x, u, ch2) = new_theta, theta
