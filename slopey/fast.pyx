@@ -13,6 +13,16 @@ cdef extern from "gsl/gsl_sf_gamma.h":
     double gsl_sf_lngamma(double x)
     double gsl_sf_lnbeta(double a, double b)
 
+cdef extern from "gsl/gsl_rng.h":
+    ctypedef struct gsl_rng_type
+    ctypedef struct gsl_rng
+    gsl_rng_type *gsl_rng_mt19937
+    gsl_rng *gsl_rng_alloc(gsl_rng_type * T) nogil
+
+cdef extern from "gsl/gsl_randist.h":
+    double gamma "gsl_ran_gamma"(gsl_rng * r, double, double)
+    double beta "gsl_ran_beta"(gsl_rng * r, double, double)
+
 ### acceptance prob
 
 cdef inline double gamma_log_density(double x, double alpha, double beta):
@@ -184,7 +194,7 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
                 y_red[t] += scale * integrate_affine(slope, time, val, start, shutter_close)
             t += 1
 
-    ### compute loglike under gaussian model
+    ### compute green channel and loglike under gaussian model
 
     cdef double ll = 2*num_frames*(-1./2 * log(np.pi) - 1./2 * log(sigmasq))
     cdef double y_green
