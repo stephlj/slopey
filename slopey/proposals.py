@@ -9,9 +9,9 @@ from fast import logq_diff as logq_diff_fast, propose as propose_fast
 def make_prior_proposer(proposal_params, T_cycle):
     trace_proposal_params, u_proposal_params, ch2_proposal_params = proposal_params
 
-    # def propose(theta):
-    #     return propose_fast(theta, T_cycle, u_proposal_params, ch2_proposal_params,
-    #                         *trace_proposal_params)
+    def propose2(theta):
+        return propose_fast(theta, T_cycle, u_proposal_params, ch2_proposal_params,
+                            *trace_proposal_params)
 
     def propose(theta):
         x, u, ch2_transform = theta

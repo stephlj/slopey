@@ -33,7 +33,7 @@ cdef double dmax(double a, double b): return a if a > b else b
 cdef inline void cumsum(double[::1] a):
     cdef int k, K = a.shape[0]
     for k in range(1,K):
-        a[k] +=  a[k-1]
+        a[k] += a[k-1]
 
 cdef inline double clip(double x, double low, double high):
     return dmin(dmax(x, low), high)
@@ -76,7 +76,7 @@ def propose(
     # propose new u
     cdef double frac = u / T_cycle
     cdef double new_u = T_cycle * clip(beta(r, frac * u_scale, (1.-frac) * u_scale),
-                                       1e-6, 1. - 1e-6)
+                                       1e-6, 1.-1e-6)
 
     return ((np.asarray(new_times), np.asarray(new_vals)), new_u, (new_a, new_b))
 

@@ -73,7 +73,7 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
             times, vals = x
             return np.diff(times)[::2]
 
-        t = np.linspace(0, 4, 250)
+        t = np.linspace(0, 10, 250)
         sampled_durations = np.array([get_slopey_durations(sample) for sample in samples])
         num_slopey = sampled_durations.shape[1]
 
