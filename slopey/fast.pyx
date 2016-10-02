@@ -142,20 +142,26 @@ cdef inline double integrate_affine(
     cdef double y_intercept = y0 - slope * x0
     return 0.5 * slope * (b**2 - a**2) + y_intercept * (b - a)
 
-def noiseless_measurements(
-        tuple x, double u,
-        int num_frames, double T_cycle, double T_blank):
-    cdef double[::1] times = x[0] - u
-    cdef double[::1] vals = x[1]
-    cdef double[::1] out = np.zeros(num_frames)
+def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double T_blank):
+    cdef double u = theta[1]
+    cdef double a = theta[2][0]
+    cdef double b = theta[2][1]
+    cdef double[::1] times = theta[0][0] - u
+    cdef double[::1] vals = theta[0][1]
+    cdef int num_frames = z.shape[0]
+
+    cdef double[::1] y_red = np.zeros(num_frames)
+    cdef double scale = 1. / (T_cycle - T_blank)
     cdef int K = times.shape[0]
+
+    ### put noiseless measurements of red channel into y_red
 
     cdef int slopey = 0, k = 0, t = 0
     cdef double slope = 0., time = times[0], val = vals[0]
     cdef double start, cycle_end, shutter_close
     while t < num_frames:
         while t < num_frames and (k >= K or (t+1)*T_cycle < times[k]):
-            out[t] = integrate_affine(
+            y_red[t] = scale * integrate_affine(
                 slope, time, val, t*T_cycle, (t+1)*T_cycle - T_blank)
             t += 1
 
@@ -165,7 +171,7 @@ def noiseless_measurements(
             shutter_close = cycle_end - T_blank
             while k < K and times[k] < cycle_end:
                 if start < shutter_close:
-                    out[t] += integrate_affine(
+                    y_red[t] += scale * integrate_affine(
                         slope, time, val, start, min(times[k], shutter_close))
                 start = times[k]
                 k += 1
@@ -175,7 +181,16 @@ def noiseless_measurements(
             time = times[k-1]
             val = vals[k-1]
             if start < shutter_close:
-                out[t] += integrate_affine(slope, time, val, start, shutter_close)
+                y_red[t] += scale * integrate_affine(slope, time, val, start, shutter_close)
             t += 1
 
-    return np.asarray(out) / (T_cycle - T_blank)
+    ### compute loglike under gaussian model
+
+    cdef double ll = 2*num_frames*(-1./2 * log(np.pi) - 1./2 * log(sigmasq))
+    cdef double y_green
+    cdef double x_red_max = np.max(vals)
+    for t in range(num_frames):
+        y_green = -a * y_red[t] + (b + a*x_red_max)
+        ll += -1./2 * ((z[t,0] - y_red[t])**2 + (z[t,1] - y_green)**2) / sigmasq
+
+    return ll

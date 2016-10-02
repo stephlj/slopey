@@ -5,7 +5,6 @@ import sys
 import cPickle as pickle
 
 from slopey.load import load_data, load_params
-from slopey.noise_models import make_gaussian_model
 from slopey.analysis import model1, make_hmm_fit_initializer
 
 
@@ -22,7 +21,7 @@ def run_analysis(
     # concatenate hyperparameters, make gaussian observation model
     trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
     prior_params = trace_params, ch2_transform_hypers
-    camera_params = T_cycle, T_blank, make_gaussian_model(noise_sigmasq)
+    camera_params = T_cycle, T_blank, noise_sigmasq
     model_params = prior_params, camera_params
 
     # create initializer function

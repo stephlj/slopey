@@ -6,7 +6,7 @@ from itertools import cycle, chain
 from functools import partial
 from operator import itemgetter
 
-from fast import noiseless_measurements as noiseless_measurements_fast
+from fast import loglike as loglike_fast
 
 
 def flip(x):
@@ -21,19 +21,10 @@ def red_to_green(x, transform_params):
 
 
 def make_camera_model(camera_params):
-    T_cycle, T_blank, noise_model = camera_params
-    noise_loglike, noise_sample = noise_model
+    T_cycle, T_blank, noise_sigmasq = camera_params
 
     def loglike(z, theta):
-        x_red, u, ch2_transform_params = theta
-        a, b = ch2_transform_params
-        num_frames = z.shape[0]
-
-        y_2ch = np.zeros((num_frames, 2))
-        y_2ch[:,0] = noiseless_measurements_fast(x_red, u, num_frames, T_cycle, T_blank)
-        y_2ch[:,1] = -a * y_2ch[:,0] + (b + a * np.max(x_red[1]))
-
-        return noise_loglike(y_2ch, z)
+        return loglike_fast(theta, z, noise_sigmasq, T_cycle, T_blank)
 
     def noiseless_measurements(F, u, num_frames):
         starts = u + np.linspace(0, num_frames * T_cycle, num_frames, endpoint=False)

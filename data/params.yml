@@ -8,7 +8,7 @@ ch2_transform_hypers: (3., 3.), (1., 5.)
 
 # inference parameters
 proposal_params: (1e3, 1e3), 1e3, 1e3
-num_iterations: 1000
+num_iterations: 10000
 
 # camera model parameters
 # 7.4 fps
