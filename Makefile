@@ -1,13 +1,13 @@
 # input files
-FILES = $(wildcard data/*Results.mat)
-SPECIFIC_PARAMS = $(wildcard data/*Results.params.yml)
+FILES = $(wildcard *Results.mat)
+SPECIFIC_PARAMS = $(wildcard *Results.params.yml)
 
 # output directories
-RESULTSDIR = results
-FIGDIR = figures
+RESULTSDIR = results_slopey
+FIGDIR = figures_slopey
 
 # global parameters file with default configuration
-GLOBALPARAMS = data/params.yml
+GLOBALPARAMS = params.yml
 
 # these variales set up dependencies on the library files, so that analysis
 # or plotting can be re-run when library functions change
@@ -40,11 +40,11 @@ clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py data/%.mat $(GLOBALPARAMS) \
-                             $$(wildcard data/%.params.yml) $(ANALYSIS_LIB)
+$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) \
+                             $$(wildcard %.params.yml)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
+	@$(PYTHON) $(SCRIPTS)/analyze_trace.py $(filter-out $(LIB)/%, $^) $@
 
 $(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
