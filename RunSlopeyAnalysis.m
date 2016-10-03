@@ -24,6 +24,7 @@ codedir = cd;
 
 setenv('PYTHONPATH', ['/Users/Steph/code/:', getenv('PYTHONPATH')]);
 setenv('PATH', ['/Users/Steph/miniconda/bin/:', getenv('PATH')]);
+setenv('MATLAB', '1')
 
 % system('make'); % Update anything that needs updating
 cd(symdir)
