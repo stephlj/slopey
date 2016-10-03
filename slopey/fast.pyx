@@ -28,6 +28,8 @@ cdef gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937)
 cdef double dmin(double a, double b): return a if a < b else b
 cdef double dmax(double a, double b): return a if a > b else b
 
+cdef double PI = 3.141592653589793
+
 ### proposals
 
 cdef inline void cumsum(double[::1] a):
@@ -209,6 +211,13 @@ cdef inline double integrate_affine(
     cdef double y_intercept = y0 - slope * x0
     return 0.5 * slope * (b**2 - a**2) + y_intercept * (b - a)
 
+cdef inline double amax(double[::1] a):
+    cdef int k, K = a.shape[0]
+    cdef double themax = a[0]
+    for k in range(1,K):
+        themax = dmax(themax, a[k])
+    return themax
+
 def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double T_blank):
     cdef double u = theta[1]
     cdef double a = theta[2][0]
@@ -253,9 +262,9 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
 
     ### compute green channel and loglike under gaussian model
 
-    cdef double ll = 2*num_frames*(-1./2 * log(np.pi) - 1./2 * log(sigmasq))
+    cdef double ll = 2*num_frames*(-1./2 * log(PI) - 1./2 * log(sigmasq))
     cdef double y_green
-    cdef double x_red_max = np.max(vals)
+    cdef double x_red_max = amax(vals)
     for t in range(num_frames):
         y_green = -a * y_red[t] + (b + a*x_red_max)
         ll += -1./2 * ((z[t,0] - y_red[t])**2 + (z[t,1] - y_green)**2) / sigmasq
