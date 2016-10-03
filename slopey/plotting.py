@@ -73,7 +73,7 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
             times, vals = x
             return np.diff(times)[::2]
 
-        t = np.linspace(0, 4, 250)
+        t = np.linspace(0, 10, 250)
         sampled_durations = np.array([get_slopey_durations(sample) for sample in samples])
         num_slopey = sampled_durations.shape[1]
 
@@ -149,7 +149,7 @@ def make_animation_callback(z, T_cycle):
 
 def plot_prior(prior_params, T_cycle, num_frames, num_slopey, num_samples):
     (_, slopey_time_hypers, flat_time_hypers), _ = prior_params
-    _, prior_sample = make_prior(prior_params)
+    prior_sample = make_prior(prior_params)[-1]
     fig, ((red_ax, green_ax), (flat_ax, slopey_ax)) = plt.subplots(2, 2, figsize=(16,6))
 
     red_ax.set_title('red channel prior samples')
