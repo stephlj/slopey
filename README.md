@@ -1,20 +1,13 @@
-![inference](figures/SNF2h103nMATP1mMHighFPS_2015_Dec04_Spot1_191_Results.png)
+## building
 
-## short-term todos
-- [x] makefile workflow
-- [ ] improve duration plotting: rugplot, smoother density
-- [ ] make inference faster
+```bash
+python setup.py build_ext --inplace
+```
 
 ## long-term possible todos
 - [ ] learn the noise parameters
-- [ ] make animation script
-- [ ] gaussian shot noise
 - [ ] infer number of slopey bits (RJ MCMC)
-- [ ] positive probability of instantaneous jumps
-- [ ] hmc / nuts sampling
-- [ ] reuse of energy levels
-- [ ] think about 'energy ladders' in the prior
-- [ ] think about multiple fast flat bits: is that an HMM again?
+- [ ] 'energy ladders' in the prior
 
 ## Notes and wish list
 Data consist of relatively long-lived “flat bits” where the intensity values
