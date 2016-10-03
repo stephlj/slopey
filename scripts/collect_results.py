@@ -2,11 +2,14 @@
 from __future__ import division
 import numpy as np
 import sys
+import os
 import cPickle as pickle
 from glob import glob
 from os.path import join, basename
 from scipy.io import savemat
-from tqdm import tqdm
+
+if not os.getenv('MATLAB'): from tqdm import tqdm
+else: tqdm = lambda x: x
 
 def load_results(resultsfile):
     with open(resultsfile) as infile:

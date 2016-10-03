@@ -1,7 +1,10 @@
 from __future__ import division
 import numpy as np
 import numpy.random as npr
-from tqdm import tqdm
+import os
+
+if not os.getenv('MATLAB'): from tqdm import tqdm
+else: tqdm = lambda x: x
 
 
 def run_mh(init_theta, joint_distn, proposal_distn, N, callback=None):
