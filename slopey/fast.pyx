@@ -1,5 +1,5 @@
 # distutils: extra_compile_args = -O3 -w -ffast-math
-# distutils: libraries = gsl gslblas
+# distutils: libraries = gsl gslcblas
 # distutils: include_dirs = /opt/local/include
 # distutils: library_dirs = /opt/local/lib
 # cython: boundscheck=False, nonecheck=False, wraparound=False, cdivision=True
