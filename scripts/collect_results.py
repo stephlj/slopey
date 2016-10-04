@@ -8,8 +8,7 @@ from glob import glob
 from os.path import join, basename
 from scipy.io import savemat
 
-if not os.getenv('MATLAB'): from tqdm import tqdm
-else: tqdm = lambda x: x
+tqdm = lambda x: x
 
 def load_results(resultsfile):
     with open(resultsfile) as infile:
