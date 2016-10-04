@@ -24,11 +24,11 @@ codedir = cd;
 
 setenv('PYTHONPATH', ['/Users/Steph/code/:', getenv('PYTHONPATH')]);
 setenv('PATH', ['/Users/Steph/miniconda/bin/:', getenv('PATH')]);
-setenv('MATLAB', '1')
+% setenv('MATLAB', '1')
 
 % system('make'); % Update anything that needs updating
 cd(symdir)
-system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
+system(fullfile('MATLAB=1 ./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
 cd(codedir)
 
 names = dir(fullfile(maindir,'*_Results.mat'));
