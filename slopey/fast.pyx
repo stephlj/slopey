@@ -18,21 +18,32 @@ cdef extern from "gsl/gsl_rng.h":
     ctypedef struct gsl_rng
     gsl_rng_type *gsl_rng_mt19937
     gsl_rng *gsl_rng_alloc(gsl_rng_type * T) nogil
+    void gsl_rng_set(gsl_rng *r, unsigned long int s)
 
 cdef extern from "gsl/gsl_randist.h":
     double gamma "gsl_ran_gamma"(gsl_rng * r, double, double)
     double beta "gsl_ran_beta"(gsl_rng * r, double, double)
 
 cdef gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937)
+gsl_rng_set(r, 0)  # should be seeded by env var, but this is just to make sure
 
 cdef double dmin(double a, double b): return a if a < b else b
 cdef double dmax(double a, double b): return a if a > b else b
 
 cdef double PI = 3.141592653589793
+cdef double EPS = 1e-8
 
 ### proposals
 
+cdef inline void diff(double[::1] a, double[::1] out):
+    # like np.diff(np.concatenate(((0,), a)))
+    cdef int k, K = a.shape[0]
+    out[0] = a[0]
+    for k in range(1, K):
+        out[k] = a[k] - a[k-1]
+
 cdef inline void cumsum(double[::1] a):
+    # destructive cumsum just like np.cumsum
     cdef int k, K = a.shape[0]
     for k in range(1,K):
         a[k] += a[k-1]
@@ -62,23 +73,23 @@ def propose(
     # propose new times
     cdef double[::1] new_times = np.zeros(K)
     for k in range(K):
-        new_times[k] = dmax(1e-6, gamma(r, times[k] * time_scale, 1./time_scale))
+        new_times[k] = dmax(EPS, gamma(r, times[k] * time_scale, 1./time_scale))
     cumsum(new_times)
 
     # propose new vals
-    cdef double[::1] new_vals = np.zeros(K)
-    for k in range(K):
-        new_vals[k] = dmax(1e-6, gamma(r, vals[k] * val_scale, 1./val_scale))
+    cdef double[::1] new_vals = np.zeros(K//2+1)
+    for k in range(K//2+1):
+        new_vals[k] = dmax(EPS, gamma(r, vals[k] * val_scale, 1./val_scale))
 
     # propose new ch2_transform_params
     cdef double new_a, new_b
-    new_a = dmax(1e-6, gamma(r, a * ch2_scale, 1./ch2_scale))
-    new_b = dmax(1e-6, gamma(r, b * ch2_scale, 1./ch2_scale))
+    new_a = dmax(EPS, gamma(r, a * ch2_scale, 1./ch2_scale))
+    new_b = dmax(EPS, gamma(r, b * ch2_scale, 1./ch2_scale))
 
     # propose new u
     cdef double frac = u / T_cycle
     cdef double new_u = T_cycle * clip(beta(r, frac * u_scale, (1.-frac) * u_scale),
-                                       1e-6, 1.-1e-6)
+                                       EPS, 1.-EPS)
 
     return ((np.asarray(new_times), np.asarray(new_vals)), new_u, (new_a, new_b))
 
@@ -89,12 +100,6 @@ cdef inline double gamma_log_density(double x, double alpha, double beta):
 
 cdef inline double beta_log_density(double x, double alpha, double beta):
     return (alpha-1.)*log(x) + (beta-1.)*log(1.-x) - gsl_sf_lnbeta(alpha, beta)
-
-cdef inline void diff(double[::1] a, double[::1] out):
-    cdef int k, K = a.shape[0]
-    out[0] = a[0]
-    for k in range(1, K):
-        out[k] = a[k] - a[k-1]
 
 def logq_diff(
         # inputs
@@ -130,7 +135,7 @@ def logq_diff(
                - gamma_log_density(new_times[k], times[k] * time_scale, time_scale)
 
     # score vals
-    for k in range(K):
+    for k in range(K//2+1):
         total += gamma_log_density(vals[k], new_vals[k] * val_scale, val_scale) \
                - gamma_log_density(new_vals[k], vals[k] * val_scale, val_scale)
 
@@ -190,7 +195,7 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
                - gamma_negenergy(times[k+1],     slopey_time_alpha, slopey_time_beta)
 
     # score vals
-    for k in range(K):
+    for k in range(K//2+1):
         total += gamma_negenergy(new_vals[k], level_alpha, level_beta) \
                - gamma_negenergy(vals[k],     level_alpha, level_beta)
 
@@ -232,32 +237,48 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
 
     ### put noiseless measurements of red channel into y_red
 
-    cdef int slopey = 0, k = 0, t = 0
+    # k = 0 is before first slopey bit, k = 1 is during first slopey bit, etc.
+    # for 0 <= k < K,  times[k] is next changepoint
+    # for 1 <= k <= K, times[k-1] is previous changepoint
+    # for k >= 0, vals[k//2] is value on the left, vals[(k+1)//2] is value on the right
+
+    # (time, val) is set to a valid point for the current segment, either left or right
+
+    cdef int k = 0, t = 0
     cdef double slope = 0., time = times[0], val = vals[0]
     cdef double start, cycle_end, shutter_close
     while t < num_frames:
+        # while there are no changepoints and still some frames left, keep integrating
         while t < num_frames and (k >= K or (t+1)*T_cycle < times[k]):
             y_red[t] = scale * integrate_affine(
                 slope, time, val, t*T_cycle, (t+1)*T_cycle - T_blank)
             t += 1
 
+        # there's a changepoint in the next frame
         if t < num_frames:
+            # start is where we're integrating from on the left
             start = t * T_cycle
             cycle_end = (t+1) * T_cycle
             shutter_close = cycle_end - T_blank
+            # while the next changepoint is in the current frame
             while k < K and times[k] < cycle_end:
+                # integrate up until the next changepoint (or shutter close)
                 if start < shutter_close:
                     y_red[t] += scale * integrate_affine(
                         slope, time, val, start, dmin(times[k], shutter_close))
-                start = times[k]
+                # increment our changepoint index, update start
                 k += 1
-                slopey ^= 1
-                slope = (vals[k-1] - vals[k]) / (times[k-1] - times[k]) \
-                    if slopey else 0.
-            time = times[k-1]
-            val = vals[k-1]
+                start = times[k-1]
+                # update the slope to reflect the current segment we're in
+                slope = (vals[k//2] - vals[(k+1)//2]) / (times[k-1] - times[k])
+                # set time/val to the left-side values
+                time = times[k-1]
+                val = vals[k//2]
+            # we're done with changepoints for this frame, but we may still have
+            # some integration to do from start to the shutter close
             if start < shutter_close:
                 y_red[t] += scale * integrate_affine(slope, time, val, start, shutter_close)
+            # ready to move on to the next frame
             t += 1
 
     ### compute green channel and loglike under gaussian model

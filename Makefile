@@ -1,19 +1,20 @@
 # input files
-FILES = $(wildcard *Results.mat)
-SPECIFIC_PARAMS = $(wildcard *Results.params.yml)
+FILES = $(wildcard data/*Results.mat)
+SPECIFIC_PARAMS = $(wildcard data/*Results.params.yml)
 
 # output directories
-RESULTSDIR = results_slopey
-FIGDIR = figures_slopey
+RESULTSDIR = results
+FIGDIR = figures
 
 # global parameters file with default configuration
-GLOBALPARAMS = params.yml
+GLOBALPARAMS = data/params.yml
 
 # these variales set up dependencies on the library files, so that analysis
 # or plotting can be re-run when library functions change
 # Luke: abspath used to be realpath, but realpath resolves symlinks
 ROOT = $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 export PYTHONPATH := $(ROOT):$(PYTHONPATH)
+# export FAST_SLOPEY_PROPOSALS := 1
 LIB = $(ROOT)/slopey
 SCRIPTS = $(ROOT)/scripts
 ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py \
@@ -40,16 +41,16 @@ clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) \
-                             $$(wildcard %.params.yml)
+$(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py data/%.mat $(GLOBALPARAMS) \
+                             $$(wildcard data/%.params.yml)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(SCRIPTS)/analyze_trace.py $(filter-out $(LIB)/%, $^) $@
+	$(PYTHON) $(filter-out $(LIB)/%, $^) $@
 
 $(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
+	$(PYTHON) $(filter-out $(LIB)/%, $^) $@
 
 $(MATFILE): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
