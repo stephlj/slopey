@@ -3,7 +3,8 @@ import numpy as np
 import numpy.random as npr
 import os
 
-tqdm = lambda x: x
+if os.getenv('USE_TQDM'): from tqdm import tqdm
+else: tqdm = lambda x: x
 
 
 def run_mh(init_theta, joint_distn, proposal_distn, N, callback=None):

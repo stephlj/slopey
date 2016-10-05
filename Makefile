@@ -14,9 +14,10 @@ GLOBALPARAMS = params.yml
 # Luke: abspath used to be realpath, but realpath resolves symlinks
 ROOT = $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 export PYTHONPATH := $(ROOT):$(PYTHONPATH)
+export FAST_SLOPEY_PROPOSALS := true
 LIB = $(ROOT)/slopey
 SCRIPTS = $(ROOT)/scripts
-ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py \
+ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py fast.so \
                                     noise_models.py priors.py samplers.py util.py)
 PLOTTING_LIB = $(addprefix $(LIB)/, load.py plotting.py util.py)
 
@@ -40,8 +41,8 @@ clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) \
-                             $$(wildcard %.params.yml)
+$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) $$(wildcard %.params.yml) \
+                             $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/analyze_trace.py $(filter-out $(LIB)/%, $^) $@
@@ -55,3 +56,6 @@ $(MATFILE): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
+
+$(LIB)/%.so: $(LIB)/%.pyx
+	@python setup.py build_ext --inplace

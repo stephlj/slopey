@@ -8,7 +8,8 @@ from glob import glob
 from os.path import join, basename
 from scipy.io import savemat
 
-tqdm = lambda x: x
+if os.getenv('USE_TQDM'): from tqdm import tqdm
+else: tqdm = lambda x: x
 
 def load_results(resultsfile):
     with open(resultsfile) as infile:
