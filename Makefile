@@ -17,7 +17,7 @@ export PYTHONPATH := $(ROOT):$(PYTHONPATH)
 export FAST_SLOPEY_PROPOSALS := true
 LIB = $(ROOT)/slopey
 SCRIPTS = $(ROOT)/scripts
-ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py fast.so \
+ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py \
                                     noise_models.py priors.py samplers.py util.py)
 PLOTTING_LIB = $(addprefix $(LIB)/, load.py plotting.py util.py)
 
@@ -56,6 +56,3 @@ $(MATFILE): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
-
-$(LIB)/%.so: $(LIB)/%.pyx
-	@python setup.py build_ext --inplace
