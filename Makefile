@@ -41,8 +41,7 @@ clean_discards:
 	rm -f $(DISCARD_PKL) $(MATFILE)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) $$(wildcard %.params.yml) \
-                             $(ANALYSIS_LIB)
+$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) $$(wildcard %.params.yml)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/analyze_trace.py $(filter-out $(LIB)/%, $^) $@
