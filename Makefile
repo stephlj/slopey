@@ -22,36 +22,43 @@ ANALYSIS_LIB = $(addprefix $(LIB)/, load.py analysis.py camera_model.py \
 PLOTTING_LIB = $(addprefix $(LIB)/, load.py plotting.py util.py)
 
 NAMES = $(sort $(notdir $(FILES)))
+
 RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.pkl))
 FIGURES = $(addprefix $(FIGDIR)/, $(NAMES:.mat=.pdf))
-MATFILE = $(addprefix $(RESULTSDIR)/, all_results.mat)
-ALL = $(RESULTS) $(FIGURES) $(MATFILE)
+MATLAB_RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.mat))
+MATLAB_ALL_RESULTS = $(addprefix $(RESULTSDIR)/, all_results.mat)
+
+ALL = $(RESULTS) $(MATLAB_RESULTS) $(FIGURES) # $(MATLAB_ALL_RESULTS)
+
 DISCARD = $(shell $(ROOT)/list_discards.py $(SPECIFIC_PARAMS))
 DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
 # DISCARD_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=.pdf))
 # DISCARD_PRIOR_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=_prior.pdf))
 
 PYTHON=python
-# MATLAB=/Applications/MATLAB_R2014b.app/bin/matlab -nodisplay -nosplash -nodesktop -nojvm -r "disp('hi'); quit" > /dev/null
 
 .PHONY: all clean clean_discards
 all: $(ALL)
-clean: ; rm -f $(ALL)
+clean: ; rm -f $(ALL) $(MATLAB_ALL_RESULTS)
 clean_discards:
-	rm -f $(DISCARD_PKL) $(MATFILE)
+	rm -f $(DISCARD_PKL) $(MATLAB_ALL_RESULTS)
 
 .SECONDEXPANSION:
-$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) $$(wildcard %.params.yml)
+$(RESULTSDIR)/%.results.pkl: %.mat $(GLOBALPARAMS) $$(wildcard %.params.yml) $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/analyze_trace.py $(filter-out $(LIB)/%, $^) $@
+
+$(RESULTSDIR)/%.results.mat: $(SCRIPTS)/collect_results.py $(RESULTSDIR)/%.results.pkl
+	@echo Generating $(notdir $@)
+	@$(PYTHON) $^ $@
 
 $(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
 
-$(MATFILE): $(SCRIPTS)/collect_results.py $(RESULTS)
+$(MATLAB_ALL_RESULTS): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
