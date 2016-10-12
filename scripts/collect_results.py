@@ -5,7 +5,7 @@ import sys
 import os
 import cPickle as pickle
 from glob import glob
-from os.path import join, basename
+from os.path import join, basename, isfile, isdir
 from scipy.io import savemat
 
 if os.getenv('USE_TQDM'): from tqdm import tqdm
@@ -33,9 +33,15 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
         resultsdir, outfile = sys.argv[1:]
     else:
-        print >>sys.stderr, '{} results_directory out.mat'.format(sys.argv[0])
+        print >>sys.stderr, '{} results_matfile_or_directory out.mat'.format(sys.argv[0])
 
-    all_files = glob(join(resultsdir, '*.results.pkl'))
-    all_results = dict(load_results(file) for file in tqdm(all_files))
+    if not isfile(resultsdir) or isdir(resultsdir): raise ValueError
+
+    if isfile(resultsdir):
+        all_files = [resultsdir]
+        all_results = dict(load_results(file) for file in all_files)
+    else:
+        all_files = glob(join(resultsdir, '*.results.pkl'))
+        all_results = dict(load_results(file) for file in tqdm(all_files))
 
     savemat(outfile, all_results, long_field_names=True, oned_as='column')
