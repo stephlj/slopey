@@ -40,34 +40,33 @@ DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
 # DISCARD_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=.pdf))
 # DISCARD_PRIOR_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=_prior.pdf))
 
-PYTHON=python
+.SECONDARY: $(LIB)/fast.so
 
 .PHONY: all clean clean_discards
 all: $(ALL)
 clean: ; rm -f $(ALL) $(MATLAB_ALL_RESULTS)
-clean_discards:
-	rm -f $(DISCARD_PKL) $(MATLAB_ALL_RESULTS)
+clean_discards: ; rm -f $(DISCARD_PKL) $(MATLAB_ALL_RESULTS)
 
 .SECONDEXPANSION:
 $(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py $(DATADIR)/%.mat \
 		$(GLOBALPARAMS) $$(wildcard $(DATADIR)/%.params.yml) $(ANALYSIS_LIB)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
+	@python $(filter-out $(LIB)/%, $^) $@
 
 $(RESULTSDIR)/%.results.mat: $(SCRIPTS)/collect_results.py $(RESULTSDIR)/%.results.pkl
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $^ $@
+	@python $^ $@
 
 $(FIGDIR)/%.pdf: $(SCRIPTS)/plot_results.py $(RESULTSDIR)/%.results.pkl $(PLOTTING_LIB)
 	@mkdir -p $(FIGDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(filter-out $(LIB)/%, $^) $@
+	@python $(filter-out $(LIB)/%, $^) $@
 
 $(MATLAB_ALL_RESULTS): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@mkdir -p $(RESULTSDIR)
 	@echo Generating $(notdir $@)
-	@$(PYTHON) $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
+	@python $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
 
 $(LIB)/%.so: $(LIB)/%.pyx $(ROOT)/setup.py
 	@echo Compiling low-level code
