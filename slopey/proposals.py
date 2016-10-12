@@ -102,7 +102,4 @@ def make_prior_proposer(proposal_params, T_cycle):
             theta, new_theta, T_cycle, u_proposal_params, ch2_proposal_params,
             *trace_proposal_params)
 
-    if os.getenv('FAST_SLOPEY_PROPOSALS'):
-        return logq_diff, logq, propose_cython
-    else:
-        return logq_diff, logq, propose
+    return logq_diff, logq, propose_cython
