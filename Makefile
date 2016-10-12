@@ -69,7 +69,7 @@ $(MATLAB_ALL_RESULTS): $(SCRIPTS)/collect_results.py $(RESULTS)
 	@echo Generating $(notdir $@)
 	@$(PYTHON) $(SCRIPTS)/collect_results.py $(RESULTSDIR) $@
 
-$(LIB)/fast.so: $(LIB)/fast.pyx $(ROOT)/setup.py
+$(LIB)/%.so: $(LIB)/%.pyx $(ROOT)/setup.py
 	@echo Compiling low-level code
 	@cd $(ROOT)
 	@python setup.py build_ext --inplace
