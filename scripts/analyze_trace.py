@@ -41,7 +41,7 @@ if __name__ == "__main__":
     elif len(sys.argv) == 5:
         datafile, global_paramfile, specific_paramfile, outfile = sys.argv[1:]
     else:
-        argspec = '{} raw_data.mat global_params.json [specific_params.json] outfile.pkl'
+        argspec = '{} raw_data.mat global_params.yml [specific_params.yml] outfile.pkl'
         print >>sys.stderr, argspec.format(sys.argv[0])
         sys.exit(1)
 
