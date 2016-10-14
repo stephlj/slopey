@@ -5,7 +5,7 @@ import sys
 import os
 import cPickle as pickle
 from glob import glob
-from os.path import join, basename, isfile, isdir
+from os.path import join, basename, isfile, isdir, exists
 from scipy.io import savemat
 
 if os.getenv('USE_TQDM'): from tqdm import tqdm
@@ -35,7 +35,9 @@ if __name__ == '__main__':
     else:
         print >>sys.stderr, '{} results_matfile_or_directory out.mat'.format(sys.argv[0])
 
-    if not isfile(resultsdir) or isdir(resultsdir): raise ValueError
+    if not exists(resultsdir):
+        print '...skipping {}'.format(resultsdir)
+        sys.exit(0)
 
     if isfile(resultsdir):
         all_files = [resultsdir]
