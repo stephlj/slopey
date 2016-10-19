@@ -119,7 +119,7 @@ while k <= length(names)
                         cd(symdir)
                         system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                         cd(codedir)
-                        results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
+                        results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze,results,k);
                     else
                         disp('Invalid start value')
                     end
@@ -148,7 +148,7 @@ while k <= length(names)
                         cd(symdir)
                         system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                         cd(codedir)
-                        results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
+                        results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze,results,k);
                     end
                     cc=13;
                 % Discard from further analysis
@@ -158,7 +158,7 @@ while k <= length(names)
                     system(strcat(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze),' clean_discards'));
                     system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                     cd(codedir)
-                    results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
+                    results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze,results,k);
                     cc=13;
                 % Don't let extra "enters" build up:
                 elseif isequal(cc,char(13)) %13 is the ascii code for the return key
