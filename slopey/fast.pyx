@@ -38,7 +38,7 @@ cdef double[::1] _times = np.zeros(KMAX)
 cdef double[::1] _new_times = np.zeros(KMAX)
 cdef double[::1] _new_vals = np.zeros(KMAX//2+1)
 
-cdef int NUM_FRAMES_MAX = 10000
+cdef int NUM_FRAMES_MAX = 50000
 cdef double[::1] _y_red = np.zeros(NUM_FRAMES_MAX)
 
 ### proposals
