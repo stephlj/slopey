@@ -33,7 +33,7 @@ FIGURES = $(addprefix $(FIGDIR)/, $(NAMES:.mat=.pdf))
 MATLAB_RESULTS = $(addprefix $(RESULTSDIR)/, $(NAMES:.mat=.results.mat))
 MATLAB_ALL_RESULTS = $(addprefix $(RESULTSDIR)/, all_results.mat)
 
-ALL = $(RESULTS) $(MATLAB_RESULTS) $(FIGURES) # $(MATLAB_ALL_RESULTS)
+ALL = $(RESULTS) $(MATLAB_RESULTS)  # $(FIGURES) $(MATLAB_ALL_RESULTS)
 
 DISCARD = $(shell $(ROOT)/list_discards.py $(SPECIFIC_PARAMS))
 DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))

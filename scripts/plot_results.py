@@ -31,7 +31,7 @@ if __name__ == "__main__":
     npr.seed(0)
 
     plot_samples(samples, data[start:end], T_cycle, warmup=len(samples)//2,
-                 use_every_k_samples=max(25, len(samples)//(2*50)))
+                 use_every_k_samples=max(25, len(samples)//(2*25)))
     plt.savefig(outfile)
 
     plot_prior(prior_params, T_cycle, len(data[start:end]), num_slopey=2, num_samples=20)
