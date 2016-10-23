@@ -27,11 +27,19 @@ cdef extern from "gsl/gsl_randist.h":
 cdef gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937)
 gsl_rng_set(r, 0)  # should be seeded by env var, but this is just to make sure
 
-cdef double dmin(double a, double b): return a if a < b else b
-cdef double dmax(double a, double b): return a if a > b else b
+cdef inline double dmin(double a, double b): return a if a < b else b
+cdef inline double dmax(double a, double b): return a if a > b else b
 
 cdef double PI = 3.141592653589793
 cdef double EPS = 1e-8
+
+cdef int KMAX = 25
+cdef double[::1] _times = np.zeros(KMAX)
+cdef double[::1] _new_times = np.zeros(KMAX)
+cdef double[::1] _new_vals = np.zeros(KMAX//2+1)
+
+cdef int NUM_FRAMES_MAX = 50000
+cdef double[::1] _y_red = np.zeros(NUM_FRAMES_MAX)
 
 ### proposals
 
@@ -67,17 +75,17 @@ def propose(
 
     cdef int K = raw_times.shape[0]
 
-    cdef double[::1] times = np.zeros(K)
+    cdef double[::1] times = _times[:K]
     diff(raw_times, times)
 
     # propose new times
-    cdef double[::1] new_times = np.zeros(K)
+    cdef double[::1] new_times = _new_times[:K]
     for k in range(K):
         new_times[k] = dmax(EPS, gamma(r, times[k] * time_scale, 1./time_scale))
     cumsum(new_times)
 
     # propose new vals
-    cdef double[::1] new_vals = np.zeros(K//2+1)
+    cdef double[::1] new_vals = _new_vals[:(K//2+1)]
     for k in range(K//2+1):
         new_vals[k] = dmax(EPS, gamma(r, vals[k] * val_scale, 1./val_scale))
 
@@ -91,7 +99,8 @@ def propose(
     cdef double new_u = T_cycle * clip(beta(r, frac * u_scale, (1.-frac) * u_scale),
                                        EPS, 1.-EPS)
 
-    return ((np.asarray(new_times), np.asarray(new_vals)), new_u, (new_a, new_b))
+    return ((np.array(new_times, copy=True), np.array(new_vals, copy=True)),
+            new_u, (new_a, new_b))
 
 ### acceptance prob
 
@@ -124,8 +133,8 @@ def logq_diff(
     cdef int k, K = raw_times.shape[0]
     cdef double total = 0.
 
-    cdef double[::1] times = np.zeros(K)
-    cdef double[::1] new_times = np.zeros(K)
+    cdef double[::1] times = _times[:K]
+    cdef double[::1] new_times = _new_times[:K]
     diff(raw_times, times)
     diff(new_raw_times, new_times)
 
@@ -182,8 +191,8 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
     cdef int k, K = raw_times.shape[0]
     cdef double total = 0.
 
-    cdef double[::1] times = np.zeros(K)
-    cdef double[::1] new_times = np.zeros(K)
+    cdef double[::1] times = _times[:K]
+    cdef double[::1] new_times = _new_times[:K]
     diff(raw_times, times)
     diff(new_raw_times, new_times)
 
@@ -223,6 +232,11 @@ cdef inline double amax(double[::1] a):
         themax = dmax(themax, a[k])
     return themax
 
+cdef inline void zero_out(double[::1] a):
+    cdef int k, K = a.shape[0]
+    for k in range(K):
+        a[k] = 0.
+
 def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double T_blank):
     cdef double u = theta[1]
     cdef double a = theta[2][0]
@@ -231,9 +245,11 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
     cdef double[::1] vals = theta[0][1]
     cdef int num_frames = z.shape[0]
 
-    cdef double[::1] y_red = np.zeros(num_frames)
+    cdef double[::1] y_red = _y_red[:num_frames]
     cdef double scale = 1. / (T_cycle - T_blank)
     cdef int K = times.shape[0]
+
+    zero_out(y_red)
 
     ### put noiseless measurements of red channel into y_red
 
