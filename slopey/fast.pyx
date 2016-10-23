@@ -33,10 +33,10 @@ cdef inline double dmax(double a, double b): return a if a > b else b
 cdef double PI = 3.141592653589793
 cdef double EPS = 1e-8
 
-cdef int KMAX = 25
-cdef double[::1] _times = np.zeros(KMAX)
-cdef double[::1] _new_times = np.zeros(KMAX)
-cdef double[::1] _new_vals = np.zeros(KMAX//2+1)
+cdef int NUM_SLOPEY_MAX = 25
+cdef double[::1] _times = np.zeros(NUM_SLOPEY_MAX)
+cdef double[::1] _new_times = np.zeros(NUM_SLOPEY_MAX)
+cdef double[::1] _new_vals = np.zeros(NUM_SLOPEY_MAX//2+1)
 
 cdef int NUM_FRAMES_MAX = 50000
 cdef double[::1] _y_red = np.zeros(NUM_FRAMES_MAX)

@@ -4,6 +4,20 @@
 python setup.py build_ext --inplace
 ```
 
+The makefile will take care of this for you unless you have some crazy
+directory structure with spaces.
+
+## Hard-coded limits on numbers of slopey bits and frames
+
+The cython file `slopey/fast.pyx` has hard-coded limits on the number of slopey bits (`NUM_SLOPEY_MAX`) and the number of frames of data (`NUM_FRAMES_MAX`). That is, those limits are set at compile time, but can be increased by editing `slopey/fast.pyx` and changing these lines (which may not be next to each other):
+
+```python
+cdef int NUM_SLOPEY_MAX = 25
+cdef int NUM_FRAMES_MAX = 50000
+```
+
+There's essentially no limit to how large you set these, but for ease of implementation they're preset.
+
 ## long-term possible todos
 - [ ] learn the noise parameters
 - [ ] infer number of slopey bits (RJ MCMC)
