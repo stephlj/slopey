@@ -7,7 +7,7 @@
 function RunSlopeyAnalysis(datadir_to_analyze)
 
 samples_to_plot = 10; % will plot the results of the last samples_to_plot iterations
-perc_dur_to_analyze = 0.10; % Will keep the last perc_dur_to_analyze% of durations
+perc_dur_to_analyze = 0.001; % Will keep the last perc_dur_to_analyze% of durations
 
 fig_pos = [100,400,900,700];
 figure('Position',fig_pos)
@@ -28,10 +28,10 @@ setenv('PATH', ['/Users/Steph/miniconda/bin/:', getenv('PATH')]);
 
 % system('make'); % Update anything that needs updating
 cd(symdir)
-system(fullfile('MATLAB=1 ./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
+system(strcat(fullfile('MATLAB=1 ./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze),' -j2'));
 cd(codedir)
 
-names = dir(fullfile(maindir,'*_Results.mat'));
+% names = dir(fullfile(maindir,'*_Results.mat'));
 
 % allresults = load(fullfile(maindir,'results','all_results.mat'));
 results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
@@ -60,13 +60,13 @@ disp('z: _z_oom; u: _u_nzoom')
 
 xlims=[0,0];
 
-while k <= length(names)
+while k <= length(results)
     currstruct = results{k};
     
     if ~isfield(results{k},'discard') || (isfield(results{k},'discard') && ~strcmpi(results{k}.discard,'true'))
     
         [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,...
-            samples_to_plot,perc_dur_to_analyze,'false',xlims);
+            samples_to_plot,'false',xlims);
 
         all_first_duration = [all_first_duration, first_duration];
         all_second_duration = [all_second_duration, second_duration];

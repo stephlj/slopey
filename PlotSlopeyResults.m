@@ -1,17 +1,21 @@
-% function PlotSlopeyResults(input_struct,samples_to_plot,perc_dur_to_analyze,discard,xlims)
+% function PlotSlopeyResults(input_struct,samples_to_plot,discard,xlims)
 %
 % Given the slopey analysis results for one trace, plots the results of the last
 % samples_to_plot iterations on top of the raw data, and histograms the
 % last perc_dur_to_analyze percent of the sampled durations. Returns the
 % durations it histograms.
 %
+% UPDATE 10/2016: Now that I'm only loading what I want to plot, the
+% perc_dur_to_analyze field is extraneous. Removing it, and just plotting
+% everything that comes in with input_struct.
+%
 % Steph 4/2016
 
 function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,...
-    samples_to_plot,perc_dur_to_analyze,discard,xlims)
+    samples_to_plot,discard,xlims)
 
 if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will plot the results of the last samples_to_plot iterations
-if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
+% if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
 if ~exist('discard','var') discard = 'false'; end
 if ~exist('xlims','var') xlims = [0 0]; end
 
@@ -109,7 +113,7 @@ smooth_width = 5;
     first_dur = [];
     second_dur = [];
     third_dur = [];
-    for d = length(input_struct.offset):-1:(length(input_struct.offset)-length(input_struct.offset)/(perc_dur_to_analyze*100))
+    for d = length(input_struct.offset):-1:1 % It's a little silly to do this backwards now, but oh well
         times = input_struct.times(d,:);
         first_dur(end+1) = times(2) - times(1);
         if length(times) > 2
