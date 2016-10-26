@@ -11,9 +11,10 @@ dirname = fullfile('/Users/Steph/Documents/UCSF/Narlikar lab/smFRET data analysi
 
 existing_yml = dir(fullfile(dirname,'*.params.yml'));
 
-overwrite = 'n';
 if ~isempty(existing_yml)
     overwrite = input('params.yml exist already; overwrite? (y/n): ','s');
+else
+    overwrite = 'y';
 end
 
 if strcmpi(overwrite,'y')

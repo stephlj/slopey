@@ -7,7 +7,7 @@
 function RunSlopeyAnalysis(datadir_to_analyze)
 
 samples_to_plot = 10; % will plot the results of the last samples_to_plot iterations
-perc_dur_to_analyze = 0.001; % Will keep the last perc_dur_to_analyze% of durations
+perc_dur_to_analyze = 0.01; % Will keep the last perc_dur_to_analyze% of durations
 
 fig_pos = [100,400,900,700];
 figure('Position',fig_pos)
