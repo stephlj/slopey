@@ -1,4 +1,4 @@
-% function PlotSlopeyResults(input_struct,samples_to_plot,discard,xlims)
+% function PlotSlopeyResults(input_struct,discard,xlims)
 %
 % Given the slopey analysis results for one trace, plots the results of the last
 % samples_to_plot iterations on top of the raw data, and histograms the
@@ -11,11 +11,8 @@
 %
 % Steph 4/2016
 
-function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,...
-    samples_to_plot,discard,xlims)
+function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,discard,xlims)
 
-if ~exist('samples_to_plot','var') samples_to_plot = 10; end % will plot the results of the last samples_to_plot iterations
-% if ~exist('perc_dur_to_analyze','var') perc_dur_to_analyze = 0.10; end % Will keep the last perc_dur_to_analyze% of durations
 if ~exist('discard','var') discard = 'false'; end
 if ~exist('xlims','var') xlims = [0 0]; end
 
@@ -43,12 +40,7 @@ smooth_width = 5;
     start_time = input_struct.start/input_struct.fps;
     end_time = input_struct.end/input_struct.fps;
     
-    % Going to plot the last 10 samples on the trace, and histogram the
-    % last 10% of slopey bit durations.
-    
     xvectData = ((1:size(input_struct.data,1))./input_struct.fps); % input_struct.data is in frames, need to plot vs seconds
-    
-    % QUESTION: Do I need to concern myself with the offset parameter?
     
     subplot('Position',[0.1 .6 .85 .35])
     if ~strcmpi(discard,'true')
@@ -58,20 +50,22 @@ smooth_width = 5;
         % Update 9/2016: adding a smoothed overlay
         plot(xvectData,medfilt2(input_struct.data(:,1),[smooth_width,1]),'-r','Linewidth',1)
         plot(xvectData,medfilt2(input_struct.data(:,2),[smooth_width,1]),'-g','Linewidth',1)
-        for b = 0:samples_to_plot-1
-            times = input_struct.times(end-b,:)+start_time;
-            vals = input_struct.vals(end-b,:);
+        % Plot model results--only a random sample of 10 of them
+        toplot = round(length(input_struct.offset).*rand(10,1));
+        for b = 1:length(toplot)
+            times = input_struct.times(b,:)+start_time-input_struct.offset(b);
+            vals = input_struct.vals(b,:);
             max_red = max(vals);
             for kk = 1:length(times)
                 curr_time = times(kk);
                 curr_red = vals(floor(kk/2)+1);
                 curr_green = redtogreen(curr_red,...
-                    max_red,input_struct.ch2_transform(end-b,1),input_struct.ch2_transform(end-b,2));
+                    max_red,input_struct.ch2_transform(b,1),input_struct.ch2_transform(b,2));
                 if kk>1
                     prev_time = times(kk-1);
                     prev_red = vals(floor((kk-1)/2)+1);
                     prev_green = redtogreen(prev_red,...
-                        max_red,input_struct.ch2_transform(end-b,1),input_struct.ch2_transform(end-b,2));
+                        max_red,input_struct.ch2_transform(b,1),input_struct.ch2_transform(b,2));
                 end
 
                 plot(curr_time,curr_red,'ob')
@@ -109,11 +103,11 @@ smooth_width = 5;
     end
     hold off
     
-    % Now plot the last 10% of the slopey durations:
+    % Now plot the slopey durations:
     first_dur = [];
     second_dur = [];
     third_dur = [];
-    for d = length(input_struct.offset):-1:1 % It's a little silly to do this backwards now, but oh well
+    for d = 1:length(input_struct.offset)
         times = input_struct.times(d,:);
         first_dur(end+1) = times(2) - times(1);
         if length(times) > 2

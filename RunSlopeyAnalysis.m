@@ -6,8 +6,7 @@
 
 function RunSlopeyAnalysis(datadir_to_analyze)
 
-samples_to_plot = 10; % will plot the results of the last samples_to_plot iterations
-perc_dur_to_analyze = 0.01; % Will keep the last perc_dur_to_analyze% of durations
+samples_to_plot = 200; 
 
 fig_pos = [100,400,900,700];
 figure('Position',fig_pos)
@@ -34,7 +33,7 @@ cd(codedir)
 % names = dir(fullfile(maindir,'*_Results.mat'));
 
 % allresults = load(fullfile(maindir,'results','all_results.mat'));
-results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze);
+results = LoadSlopeyResults(maindir,samples_to_plot);
 
 all_first_duration = [];
 all_second_duration = [];
@@ -65,8 +64,7 @@ while k <= length(results)
     
     if ~isfield(results{k},'discard') || (isfield(results{k},'discard') && ~strcmpi(results{k}.discard,'true'))
     
-        [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,...
-            samples_to_plot,'false',xlims);
+        [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,'false',xlims);
 
         all_first_duration = [all_first_duration, first_duration];
         all_second_duration = [all_second_duration, second_duration];
@@ -119,7 +117,7 @@ while k <= length(results)
                         cd(symdir)
                         system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                         cd(codedir)
-                        results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze,results,k);
+                        results = LoadSlopeyResults(maindir,samples_to_plot,results,k);
                     else
                         disp('Invalid start value')
                     end
@@ -148,7 +146,7 @@ while k <= length(results)
                         cd(symdir)
                         system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                         cd(codedir)
-                        results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze,results,k);
+                        results = LoadSlopeyResults(maindir,samples_to_plot,results,k);
                     end
                     cc=13;
                 % Discard from further analysis
@@ -158,7 +156,7 @@ while k <= length(results)
                     system(strcat(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze),' clean_discards'));
                     system(fullfile('./Analyze_Slopey.sh Symlinks_Data',datadir_to_analyze));
                     cd(codedir)
-                    results = LoadSlopeyResults(maindir,samples_to_plot,perc_dur_to_analyze,results,k);
+                    results = LoadSlopeyResults(maindir,samples_to_plot,results,k);
                     cc=13;
                 % Don't let extra "enters" build up:
                 elseif isequal(cc,char(13)) %13 is the ascii code for the return key
