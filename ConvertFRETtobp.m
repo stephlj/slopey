@@ -16,4 +16,4 @@ else
     return
 end
 
-bp = round(sqrt(9*(R0^6/FRET-1)^(1/3)-9*a^2));
+bp = sqrt(9*(R0^6/FRET-1)^(1/3)-9*a^2);
