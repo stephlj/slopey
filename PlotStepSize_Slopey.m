@@ -10,7 +10,7 @@ function PlotStepSize_Slopey(datadir_to_analyze,num_samples_to_analyze,label,bp)
 maindir = fullfile('/Users/Steph/Documents/UCSF/Narlikar lab/smFRET data analysis/HMM results',...
         datadir_to_analyze);
 
-[all_p,all_t] = Extract_Slopey_Results(datadir_to_analyze,num_samples_to_analyze,label);
+[all_p,all_t] = Extract_Slopey_Results(maindir,num_samples_to_analyze,label);
 
 if bp==1
     ValToExtract = 3;
@@ -101,10 +101,10 @@ for t = 1:length(all_t)
     xlim(xlimsD)
     if bp==1
         xlabel(strcat('Difference in bp (state num = ',int2str(t),')'),'Fontsize',14)
-        print('-depsc',fullfile(maindir,strcat('StateHisto_p',int2str(t),'_Slopey_bp')))
+        print('-depsc',fullfile(maindir,strcat('StateDiffs_p',int2str(t),'_Slopey_bp')))
     else
         xlabel(strcat('Difference in FRET (state num = ',int2str(t),')'),'Fontsize',14)
-        print('-depsc',fullfile(maindir,strcat('StateHisto_p',int2str(t),'_Slopey_FRET')))
+        print('-depsc',fullfile(maindir,strcat('StateDiffs_p',int2str(t),'_Slopey_FRET')))
     end
 end
 sumdF = sumdF./numdF;
