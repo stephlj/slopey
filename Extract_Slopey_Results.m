@@ -2,6 +2,8 @@
 % 
 % Takes all the slopey results in a datadir and aggregates pause and
 % translocation information.
+%
+% Datadir needs to be the full path to the directory to analyze.
 % 
 % To compute, e.g., average duration of the wait pause, you would want 
 %     mean(all_p{1}(:,1))
@@ -18,10 +20,8 @@
 % 
 % Steph 11/2016
 
-function [all_p,all_t] = Extract_Slopey_Results(datadir_to_analyze,num_samples_to_avg,label,bootstr_smpls)
+function [all_p,all_t] = Extract_Slopey_Results(maindir,num_samples_to_avg,label,bootstr_smpls)
 
-maindir = fullfile('/Users/Steph/Documents/UCSF/Narlikar lab/smFRET data analysis/HMM results',...
-        datadir_to_analyze);
 results = LoadSlopeyResults(maindir,num_samples_to_avg);
 default_t_Inj = 9.98; % seconds
 
