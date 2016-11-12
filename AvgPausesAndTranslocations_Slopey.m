@@ -50,15 +50,17 @@ for kk=1:length(all_t)
         plot(all_t{kk}(:,1),all_t{kk}(:,3),'xb')
         hold on
         % rate_fit = fit(all_t{kk}(:,1),all_t{kk}(:,3),'poly1');
-        rate_fit = fit(all_t{kk}(:,1),all_t{kk}(:,3),@(p1,x)x*p1,'StartPoint',mean(all_t{kk}(:,3))/mean(all_t{kk}(:,1)));
-        mean_rates_t(kk) = rate_fit.p1;
+        % rate_fit = fit(all_t{kk}(:,1),all_t{kk}(:,3),@(p1,x)x*p1,'StartPoint',mean(all_t{kk}(:,3))/mean(all_t{kk}(:,1)));
+        % mean_rates_t(kk) = rate_fit.p1;
+        % Faster to just use the backslash operator!
+        mean_rates_t(kk) = all_t{kk}(:,1)\all_t{kk}(:,3);
         rate_x = linspace(min(0,min(all_t{kk}(:,1))),max(all_t{kk}(:,1)));
         % plot(rate_x,rate_fit.p1.*rate_x+rate_fit.p2,'-k')
-        plot(rate_x,rate_fit.p1.*rate_x,'-k')
+        plot(rate_x,mean_rates_t(kk).*rate_x,'-k')
         xlabel(strcat('Translocation duration (t=',int2str(kk),')'))
         ylabel('bp translocated')
-        legend(strcat('Rate = ',num2str(rate_fit.p1)))
-        clear rate_x rate_fit
+        legend(strcat('Rate = ',num2str(mean_rates_t(kk))))
+        clear rate_x A
     end
 end
 print('-depsc',fullfile(resultsdir,'Tr_Rate_plots'))
@@ -77,10 +79,7 @@ for j = 1:num_bs
     end
     for t = 1:length(t_temp)
         if length(t_temp{t}(:,1)) >= 2
-            % rate_fit = fit(t_temp{t}(:,1),t_temp{t}(:,3),'poly1');
-            rate_fit = fit(t_temp{t}(:,1),t_temp{t}(:,3),@(p1,x)x*p1,'StartPoint',mean(t_temp{t}(:,3))/mean(t_temp{t}(:,1)));
-            bs_t(t,j) = rate_fit.p1;
-            clear rate_fit
+            bs_t(t,j) = t_temp{t}(:,1)\t_temp{t}(:,3);
         end
     end
     clear p_temp t_temp

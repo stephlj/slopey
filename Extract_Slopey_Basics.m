@@ -25,9 +25,36 @@ for kk = 1:2:length(times)
             t_dFRET(ceil(kk/2)) = FRETvals(ceil(kk/2))-FRETvals(ceil(kk/2)+1);
             t_dbp(ceil(kk/2)) = ConvertFRETtobp(FRETvals(ceil(kk/2)+1),label)-ConvertFRETtobp(FRETvals(ceil(kk/2)),label);
         else
+            if ~exist('t_dur','var')
+                t_dur = -1;
+            end
+            if ~exist('t_dFRET','var')
+                t_dFRET = -1;
+            end
+            if ~exist('t_dbp','var')
+                t_dbp = -1;
+            end
             break
         end
     else
+        if ~exist('p_dur','var')
+            p_dur = -1;
+        end
+        if ~exist('t_dur','var')
+            t_dur = -1;
+        end
+        if ~exist('p_FRET','var')
+            p_FRET = -1;
+        end
+        if ~exist('t_dFRET','var')
+            t_dFRET = -1;
+        end
+        if ~exist('p_bp','var')
+            p_bp = -1;
+        end
+        if ~exist('t_dbp','var')
+            t_dbp = -1;
+        end
         break
     end
 end

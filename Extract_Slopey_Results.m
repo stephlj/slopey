@@ -66,8 +66,10 @@ for r = 1:size(tokeep,1)
     if ~isempty(tokeep{r,1})
         [p_dur,t_dur,p_FRET,t_dFRET,p_bp,t_dbp] = Extract_Slopey_Basics(tokeep{r,1},tokeep{r,2},label);
         for p = 1:length(p_dur)
-            all_p{p}(end+1,:) = [p_dur(p) p_FRET(p) p_bp(p)];
-            if p<=length(t_dur)
+            if p_dur(p)~=-1 && p_FRET(p)~=-1 && p_bp(p)~=-1
+                all_p{p}(end+1,:) = [p_dur(p) p_FRET(p) p_bp(p)];
+            end
+            if p<=length(t_dur) && t_dur(p)~=-1 && t_dFRET(p)~=-1 && t_dbp(p)~=-1
                 all_t{p}(end+1,:) = [t_dur(p) t_dFRET(p) t_dbp(p)];
             end
         end
