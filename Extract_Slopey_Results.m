@@ -27,7 +27,11 @@ default_t_Inj = 9.98; % seconds
 
 if ~exist('label','var') label = 'H3'; end
 
-if ~exist('bootstr_smpls','var') || max(bootstr_smpls)>length(results)
+if ~exist('bootstr_smpls','var')
+    bootstr_smpls = 1:length(results); 
+end
+
+if max(bootstr_smpls)>length(results)
     bootstr_smpls = 1:length(results); 
     disp('Not using special (e.g. bootstrapped) trace list.')
 end
