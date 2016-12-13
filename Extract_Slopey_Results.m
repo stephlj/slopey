@@ -1,4 +1,4 @@
-% function [all_p,all_t] = Extract_Slopey_Results(datadir_to_analyze,num_samples_to_avg,label,bootstr_smpls)
+% function [all_p,all_t] = Extract_Slopey_Results(datadir_to_analyze,num_samples_to_avg,label,slopey,bootstr_smpls)
 % 
 % Takes all the slopey results in a datadir and aggregates pause and
 % translocation information.
@@ -9,7 +9,8 @@
 %     mean(all_p{1}(:,1))
 %
 % Last input is optional and is a list of trace indices to compute
-% durations etc from.
+% durations etc from. Second to last is 1 to use output of Slopey, 0 to use
+% output of the old HMM (pyhsmm).
 % 
 % all_p{i} will have an n by 3 matrix, where i is the pause duration number
 % (wait, p1, p2, etc) and n is the number of traces that have that state.
@@ -20,18 +21,28 @@
 % 
 % Steph 11/2016
 
-function [all_p,all_t] = Extract_Slopey_Results(maindir,num_samples_to_avg,label,bootstr_smpls)
+function [all_p,all_t] = Extract_Slopey_Results(maindir,num_samples_to_avg,label,slopey,bootstr_smpls)
 
-results = LoadSlopeyResults(maindir,num_samples_to_avg);
+if slopey
+    results = LoadSlopeyResults(maindir,num_samples_to_avg);
+else
+    results_temp = dir(fullfile(maindir,'*_Results.mat'));
+    results = cell(length(results_temp),1);
+    names = cell(length(results_temp),1);
+    for b = 1:length(results_temp)
+        results{b} = load(fullfile(maindir,results_temp(b).name));
+        names{b} = results_temp(b).name;
+    end
+    tokeep_pyhsmm = load(fullfile(maindir,'ToAnalyzeFurther.mat'));
+    tokeep_pyhsmm = tokeep_pyhsmm.tokeep;
+end
 default_t_Inj = 9.98; % seconds
 
 if ~exist('label','var') label = 'H3'; end
 
 if ~exist('bootstr_smpls','var')
     bootstr_smpls = 1:length(results); 
-end
-
-if max(bootstr_smpls)>length(results)
+elseif exist('bootstr_smpls','var') && max(bootstr_smpls)>length(results)
     bootstr_smpls = 1:length(results); 
     disp('Not using special (e.g. bootstrapped) trace list.')
 end
@@ -42,10 +53,15 @@ k = 1;
 % Any discarded traces will result in an empty matrix in that cell of
 % tokeep.
 for j=bootstr_smpls
-    if ~isfield(results{j},'discard') || ~strcmpi(results{j}.discard,'true')
+    if (slopey && (~isfield(results{j},'discard') || ~strcmpi(results{j}.discard,'true'))) || ...
+            tokeep_pyhsmm(j)
         if ~isfield(results{j},'t_Inj')
             % Get the injection time from the original data file (in seconds)
-            orig_file = load(fullfile(maindir,results{j}.name));
+            if slopey
+                orig_file = load(fullfile(maindir,results{j}.name));
+            else
+                orig_file = results{j};
+            end
             if isfield(orig_file,'t_Inj')
                t_Inj = orig_file.t_Inj;
                results{j}.t_Inj = t_Inj;
@@ -57,7 +73,9 @@ for j=bootstr_smpls
         else
             t_Inj = results{j}.t_Inj;
         end
-        [tokeep{k,1},~,~,tokeep{k,2}] = CalcAvgSlopey(results{j},t_Inj);
+        [tokeep{k,1},~,~,tokeep{k,2}] = CalcAvgSlopey(results{j},t_Inj,slopey);
+        % names{j}
+        % [tokeep{k,1},~,~,tokeep{k,2}] = CalcAvgSlopey(results{j},t_Inj,slopey, 1);
         k = k+1;
     end
 end

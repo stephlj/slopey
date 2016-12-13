@@ -2,7 +2,7 @@
 %
 % Takes the output of CalcAvgSlopey and computes the durations, FRET values
 % and bp values of each pause and the durations and changes in FRET and bp
-% of each translocation.
+% of each translocation. Agnostic to slopey vs pyhsmm.
 %
 % This excludes everything after backsteps.
 %

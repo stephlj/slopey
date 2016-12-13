@@ -2,6 +2,8 @@
 %
 % Input can be:
 % 'SNF2hWvsNoyS'
+% 'APM'
+% 'INO80_PreboundvsNot'
 %
 % Steph 11/2016
 
@@ -33,4 +35,13 @@ elseif strcmpi(resultset,'APM')
     lgndtext{4} = '2 uM 2RA, H2A/E64R';
     labels{4} = 'H3';
     colors{4} = 'm';
+elseif strcmpi(resultset,'INO80_PreboundvsNot')
+    datasets{1} = 'INO8015nMATP1mM378H3Cy3';
+    lgndtext{1} = '15 nM INO80, 1 mM ATP';
+    labels{1} = 'H3';
+    colors{1} = 'b';
+    datasets{2} = 'INO8015nMpreboundATP1mM378H3Cy3';
+    lgndtext{2} = '15 nM INO80, prebound 10 min, 1 mM ATP';
+    labels{2} = 'H3';
+    colors{2} = 'c';
 end
