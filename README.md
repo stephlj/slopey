@@ -18,6 +18,50 @@ cdef int NUM_FRAMES_MAX = 50000
 
 There's essentially no limit to how large you set these, but for ease of implementation they're preset.
 
+##running Steph’s Matlab code##
+
+To use the information in the goodtraces.txt parameters file from pyhsmm, first run
+
+```matlab
+ConvertGoodTracesToYAML(<datadir>)
+```
+
+Ensure that datadir has a global params.yml file.
+
+Because Steph does have a crazy directory structure with spaces, need to create a symbolic link to each data directory. In Terminal, run:
+
+```bash
+cd “~/Documents/UCSF/.../Symlinks_Data” 
+ln -s “/Users/Steph/Documents/.../smFRET data analysis/<datadir>” DataDirName 
+```
+
+To run slopey, either run in the Terminal:
+```bash
+./Analyze_Slopey.sh Symlinks_Data/DataDirName
+```
+with optional additional arguments: clean, -dr (prints debug info from make), -j4 (runs multi-threaded). Or, run in Matlab:
+
+```matlab
+RunSlopeyAnalysis(DataDirName)
+```
+
+If you get:
+
+```matlab
+make: *** [results_slopey/*_Results.results.pkl] Abort trap: 6
+```
+
+this is likely a trace with one or more long dwells to which pyhsmm assigned many fast-switching states. If pyhsmm is used for initialization, you’ll have problems. 
+
+Fix: edit the *_Results.params.yml file (or create a new one) such that 
+
+```matlab
+translocation_frame_guesses: [x1,x2,x3]
+```
+has reasonable values for x1, x2, x3, etc.
+
+###old###
+
 ## long-term possible todos
 - [ ] learn the noise parameters
 - [ ] infer number of slopey bits (RJ MCMC)

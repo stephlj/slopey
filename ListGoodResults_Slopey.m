@@ -20,21 +20,21 @@ if strcmpi(resultset,'SNF2hWvsNoyS')
     colors{2} = 'b';
 elseif strcmpi(resultset,'APM')
     datasets{1} = 'SNF2hNG400nMATP1mMH3Cy3';
-    lgndtext{1} = '400 nM SNF2h';
+    lgndtext{1} = 'WT/SNF2h';
     labels{1} = 'H3';
-    colors{1} = 'b';
+    colors{1} = 'k';
     datasets{2} = 'SNF2hNG2uMATP1mMH3Cy3APM';
-    lgndtext{2} = '2 uM SNF2h, H2A/E64R';
+    lgndtext{2} = 'E64R/SNF2h';
     labels{2} = 'H3';
-    colors{2} = 'c';
-    datasets{3} = 'SNF2h2RA400nMATP1mMH3Cy3';
-    lgndtext{3} = '400 nM 2RA';
-    labels{3} = 'H3';
-    colors{3} = 'r';
-    datasets{4} = 'SNF2h2RA2uMATP1mMH3Cy3APM';
-    lgndtext{4} = '2 uM 2RA, H2A/E64R';
-    labels{4} = 'H3';
-    colors{4} = 'm';
+    colors{2} = 'r';
+%     datasets{3} = 'SNF2h2RA400nMATP1mMH3Cy3';
+%     lgndtext{3} = 'WT/2RA SNF2h';
+%     labels{3} = 'H3';
+%     colors{3} = 'b';
+%     datasets{4} = 'SNF2h2RA2uMATP1mMH3Cy3APM';
+%     lgndtext{4} = 'E64R/2RA SNF2h';
+%     labels{4} = 'H3';
+%     colors{4} = 'm';
 elseif strcmpi(resultset,'INO80_PreboundvsNot')
     datasets{1} = 'INO8015nMATP1mM378H3Cy3';
     lgndtext{1} = '15 nM INO80, 1 mM ATP';
