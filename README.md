@@ -1,4 +1,4 @@
-## building
+## Building
 
 ```bash
 python setup.py build_ext --inplace
@@ -18,7 +18,7 @@ cdef int NUM_FRAMES_MAX = 50000
 
 There's essentially no limit to how large you set these, but for ease of implementation they're preset.
 
-##running Steph’s Matlab code##
+##Running Steph’s Matlab code##
 
 To use the information in the goodtraces.txt parameters file from pyhsmm, first run
 
@@ -60,7 +60,7 @@ translocation_frame_guesses: [x1,x2,x3]
 ```
 has reasonable values for x1, x2, x3, etc.
 
-###old###
+#Old#
 
 ## long-term possible todos
 - [ ] learn the noise parameters
