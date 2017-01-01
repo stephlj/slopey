@@ -27,14 +27,14 @@ elseif strcmpi(resultset,'APM')
     lgndtext{2} = 'E64R/SNF2h';
     labels{2} = 'H3';
     colors{2} = 'r';
-%     datasets{3} = 'SNF2h2RA400nMATP1mMH3Cy3';
-%     lgndtext{3} = 'WT/2RA SNF2h';
-%     labels{3} = 'H3';
-%     colors{3} = 'b';
-%     datasets{4} = 'SNF2h2RA2uMATP1mMH3Cy3APM';
-%     lgndtext{4} = 'E64R/2RA SNF2h';
-%     labels{4} = 'H3';
-%     colors{4} = 'm';
+    datasets{3} = 'SNF2h2RA400nMATP1mMH3Cy3';
+    lgndtext{3} = 'WT/2RA SNF2h';
+    labels{3} = 'H3';
+    colors{3} = 'b';
+    datasets{4} = 'SNF2h2RA2uMATP1mMH3Cy3APM';
+    lgndtext{4} = 'E64R/2RA SNF2h';
+    labels{4} = 'H3';
+    colors{4} = 'm';
 elseif strcmpi(resultset,'INO80_PreboundvsNot')
     datasets{1} = 'INO8015nMATP1mM378H3Cy3';
     lgndtext{1} = '15 nM INO80, 1 mM ATP';

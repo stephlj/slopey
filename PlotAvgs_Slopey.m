@@ -1,4 +1,4 @@
-% function PlotAvgs_Slopey(datadir)
+% function PlotAvgs_Slopey(resultset,slopey)
 %
 % resultset is any input to ListGoodResults_Slopey; if slopey = 1, use
 % output of slopey, else use output of pyhsmm.

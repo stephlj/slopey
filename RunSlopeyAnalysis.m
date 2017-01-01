@@ -54,7 +54,7 @@ all_third_duration = [];
 
 k=1;
 disp(',: back one trace; .: forward; s: change _s_tart crop; e: change _e_nd crop')
-disp('n: change _n_umber of slopey bits; i: change _i_nitialization; d: _d_iscard from analysis')
+disp('n: change _n_umber of slopey bits or initialization; d: _d_iscard from analysis')
 disp('z: _z_oom; u: _u_nzoom')
 
 xlims=[0,0];
@@ -123,12 +123,8 @@ while k <= length(results)
                     end
                     cc=13;
                 % Change initialization or num_slopey
-                elseif cc=='n' || cc=='i'
-                    if cc=='n' || ~isfield(currstruct,'num_slopey')
-                        new_num = round(input('How many slopey bits to find? '));
-                    else
-                        new_num = currstruct.num_slopey;
-                    end
+                elseif cc=='n'
+                    new_num = round(input('How many slopey bits to find? '));
                     if new_num>0
                         u = 1;
                         new_init = zeros(new_num,1);

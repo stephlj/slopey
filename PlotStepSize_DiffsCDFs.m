@@ -12,7 +12,7 @@
 
 function PlotStepSize_DiffsCDFs(Dataset,bp,slopey,num_samples_to_analyze)
 
-num_bs = 10000;
+num_bs = 1000;
 
 if slopey==1 && ~exist('num_samples_to_analyze','var')
     disp('Slopey requires num_samples_to_analyze; not using slopey.')
