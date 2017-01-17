@@ -54,7 +54,7 @@ RunSlopeyAnalysis(DataDirName)
 If you get:
 
 ```matlab
-make: *** [results_slopey/*_Results.results.pkl] Abort trap: 6
+make: *** [results_slopey/*\_Results.results.pkl] Abort trap: 6
 ```
 
 this is likely a trace with one or more long dwells to which pyhsmm assigned many fast-switching states. If pyhsmm is used for initialization, you’ll have problems. 
