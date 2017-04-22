@@ -63,7 +63,7 @@ for j=bootstr_smpls
                 orig_file = results{j};
             end
             if isfield(orig_file,'t_Inj')
-               t_Inj = orig_file.t_Inj;
+               t_Inj = orig_file.t_Inj(1);
                results{j}.t_Inj = t_Inj;
             else
                disp(sprintf('Using default t_Inj of %d seconds',t_Inj))
@@ -71,7 +71,7 @@ for j=bootstr_smpls
             end
             clear orig_file
         else
-            t_Inj = results{j}.t_Inj;
+            t_Inj = results{j}.t_Inj(1);
         end
         [tokeep{k,1},~,~,tokeep{k,2}] = CalcAvgSlopey(results{j},t_Inj,slopey);
         % names{j}

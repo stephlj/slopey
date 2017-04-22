@@ -1,4 +1,4 @@
-#Quantification of single-molecule FRET trajectories that have non-instantaneous transitions#
+# Quantification of single-molecule FRET trajectories that have non-instantaneous transitions
 
 Slopey is written to handle smFRET data that consist of relatively long-lived “flat bits,” where the intensity values appear to be Gaussian scatter around a mean value (that is, they seem to be
 well described as a constant intensity value with some noise). These flat bits
@@ -24,7 +24,7 @@ cdef int NUM_FRAMES_MAX = 50000
 
 There's essentially no limit to how large you set these, but for ease of implementation they're preset.
 
-##Running Steph’s Matlab code##
+## Running Steph’s Matlab code
 
 To use the information in the goodtraces.txt parameters file from pyhsmm, first run
 

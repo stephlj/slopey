@@ -13,7 +13,7 @@ if ~exist('slopey','var')
     slopey = 0;
 end
 
-[datasets,labels,legends,colors] = ListGoodResults_Slopey(resultset);
+[datasets,labels,legends,colors,XTickLabels] = ListGoodResults_Slopey(resultset);
 
 % plot the first three pause durations and (if slopey) the first two translocation
     % rates
@@ -48,7 +48,7 @@ hold on
 errorbar(xvect,reshape(p_bar_vals',1,size(p_bar_vals,1)*size(p_bar_vals,2)),...
     reshape(p_err_vals',1,size(p_err_vals,1)*size(p_err_vals,2)),'.k')
 set(gca,'XTick',[1,2,3])
-set(gca,'XTickLabel',{'wait';'p1';'p2'})
+set(gca,'XTickLabel',XTickLabels)
 legend(legends)
 ylabel('Duration (sec)')
 set(gca,'Fontsize',14)

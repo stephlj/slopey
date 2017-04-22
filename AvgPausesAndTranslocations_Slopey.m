@@ -31,7 +31,9 @@ resultsdir = fullfile('/Users/Steph/Documents/UCSF/Narlikar lab/smFRET data anal
         resultsdir);
 
 % Number of bootstrapped results to create:
-if ~exist('num_bs','var') num_bs = 1000; end
+if ~exist('num_bs','var') 
+    num_bs = 1000; 
+end
 
 % Get the means and find out how many traces are in this dataset:
 [all_p,all_t] = Extract_Slopey_Results(resultsdir,num_samples_to_avg,label,slopey);

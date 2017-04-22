@@ -22,9 +22,10 @@ if bp==1
     y_density = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
     ylim_density = 0.4;
     % ylim_density_D = 0.15;
-    % bwD = 0.65;
-    bwD = 0.35;
-    ylim_density_D = 0.3;
+    bwD = 0.5;
+    % bwD = 0.35;
+    % ylim_density_D = 0.3;
+    ylim_density_D = 0.2;
     xlims = [0 26];
     if length(find(all_t{1}(:,3)>=0))==length(all_t{1}(:,3)) % This is if all diffs calculated are absolute values
         % histo_range_diffs = 0:1:20;

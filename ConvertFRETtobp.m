@@ -9,17 +9,17 @@ function bp = ConvertFRETtobp(FRET,label)
 if ~exist('label','var') label = 'H3'; end
 
 if strcmpi(label,'H3')
-    a = 5.456; % nm
-    R0 = 7.124; % nm
-    c = 0.1254; % FRET
+    d_0 = 5.8; % nm
+    R0 = 10.9; % nm
+    theta = 153.8; % degrees
 else
     disp('ConvertFRETtobp: H2A label not implemented yet.')
     return
 end
 
-bp = (1/0.34)*sqrt(R0^2*(1/(FRET-c)-1)^(1/3)-a^2);
+bp = (1/0.34)*(d_0*cosd(theta)+sqrt(d_0^2*((cosd(theta))^2-1)+R0^2*(1/FRET-1)^(1/3)));
 
-if ~isreal(bp)
+if ~isreal(bp) || bp<0
     if FRET > 0.95
         bp=3;
     else
