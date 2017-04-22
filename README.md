@@ -53,7 +53,7 @@ RunSlopeyAnalysis(DataDirName)
 
 If you get:
 
-```matlab
+```
 make: *** [results_slopey/*_Results.results.pkl] Abort trap: 6
 ```
 
