@@ -1,8 +1,7 @@
-# Quantification of single-molecule FRET trajectories that have non-instantaneous transitions
+# Quantification of single-molecule FRET trajectories containing non-instantaneous transitions
 
-Slopey is written to handle smFRET data that consist of relatively long-lived “flat bits,” where the intensity values appear to be Gaussian scatter around a mean value (that is, they seem to be
-well described as a constant intensity value with some noise). These flat bits
-are separated by “slopey” bits that, though fast, are not instantaneous jumps. Current HMM fitting techniques in the field assume Gaussian emissions with instantaneous transitions.
+Slopey was written to handle smFRET data that consist of relatively long-lived “flat bits,” where the intensity values appear to be Gaussian scatter around a mean value (that is, they seem to be
+well described as a constant intensity value with some noise), separated by “slopey” bits, which, though fast, are not instantaneous jumps. Current HMM fitting techniques in the field assume Gaussian emissions with instantaneous transitions.
 
 ## Building
 
@@ -34,7 +33,7 @@ ConvertGoodTracesToYAML(<datadir>)
 
 Ensure that datadir has a global params.yml file.
 
-Because Steph does have a crazy directory structure with spaces, need to create a symbolic link to each data directory. In Terminal, run:
+Because Steph does have a crazy directory structure with spaces, you will need to create a symbolic link to each data directory. In Terminal, run:
 
 ```bash
 cd “~/Documents/UCSF/.../Symlinks_Data” 
