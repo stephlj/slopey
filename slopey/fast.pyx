@@ -62,8 +62,9 @@ cdef inline double clip(double x, double low, double high):
 def propose(
         # input
         tuple theta,
-        # constant needed for proposing u
+        # constants
         double T_cycle,
+        double slopey_time_min, double slopey_time_max,
         # proposal scale parameters
         double u_scale, double ch2_scale,
         double val_scale, double time_scale):
@@ -73,15 +74,20 @@ def propose(
     cdef double a = theta[2][0]
     cdef double b = theta[2][1]
 
-    cdef int K = raw_times.shape[0]
+    cdef int k, K = raw_times.shape[0]
+    cdef double frac
 
     cdef double[::1] times = _times[:K]
     diff(raw_times, times)
 
     # propose new times
     cdef double[::1] new_times = _new_times[:K]
-    for k in range(K):
+    for k in range(0,K,2):
         new_times[k] = dmax(EPS, gamma(r, times[k] * time_scale, 1./time_scale))
+
+        frac = (times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
+        new_times[k+1] = slopey_time_min + (slopey_time_max - slopey_time_min) \
+                * clip(beta(r, frac * time_scale, (1.-frac) * time_scale), EPS, 1.-EPS)
     cumsum(new_times)
 
     # propose new vals
@@ -95,7 +101,7 @@ def propose(
     new_b = dmax(EPS, gamma(r, b * ch2_scale, 1./ch2_scale))
 
     # propose new u
-    cdef double frac = u / T_cycle
+    frac = u / T_cycle
     cdef double new_u = T_cycle * clip(beta(r, frac * u_scale, (1.-frac) * u_scale),
                                        EPS, 1.-EPS)
 
@@ -113,8 +119,9 @@ cdef inline double beta_log_density(double x, double alpha, double beta):
 def logq_diff(
         # inputs
         tuple theta, tuple new_theta,
-        # constant needed for scoring u
+        # constants
         double T_cycle,
+        double slopey_time_min, double slopey_time_max,
         # proposal scale parameters
         double u_scale, double ch2_scale,
         double val_scale, double time_scale):
@@ -131,6 +138,7 @@ def logq_diff(
     cdef double new_b = new_theta[2][1]
 
     cdef int k, K = raw_times.shape[0]
+    cdef double frac, new_frac
     cdef double total = 0.
 
     cdef double[::1] times = _times[:K]
@@ -139,9 +147,14 @@ def logq_diff(
     diff(new_raw_times, new_times)
 
     # score times
-    for k in range(K):
+    for k in range(0, K, 2):
         total += gamma_log_density(times[k], new_times[k] * time_scale, time_scale) \
                - gamma_log_density(new_times[k], times[k] * time_scale, time_scale)
+
+        frac = (times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
+        new_frac = (new_times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
+        total += beta_log_density(frac, new_frac * time_scale, (1.-new_frac) * time_scale) \
+               - beta_log_density(new_frac, frac * time_scale,     (1.-frac) * time_scale)
 
     # score vals
     for k in range(K//2+1):
@@ -155,7 +168,8 @@ def logq_diff(
            + gamma_log_density(new_b, ch2_scale*b,     ch2_scale)
 
     # score u
-    cdef double frac = u / T_cycle, new_frac = new_u / T_cycle
+    frac = u / T_cycle
+    new_frac = new_u / T_cycle
     total += beta_log_density(frac,     new_frac * u_scale, (1.-new_frac) * u_scale) \
            - beta_log_density(new_frac,     frac * u_scale,     (1.-frac) * u_scale)
 
@@ -163,6 +177,9 @@ def logq_diff(
 
 cdef inline double gamma_negenergy(double x, double alpha, double beta):
     return (alpha-1.)*log(x) - beta*x
+
+cdef inline double beta_negenergy(double x, double alpha, double beta):
+    return (alpha-1.)*log(x) - (beta-1) * log(1.-x)
 
 def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
     cdef double[::1] raw_times = theta[0][0]
@@ -179,8 +196,8 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
 
     cdef double level_alpha = prior_params[0][0][0], \
                 level_beta  = prior_params[0][0][1], \
-                slopey_time_alpha = prior_params[0][1][0], \
-                slopey_time_beta  = prior_params[0][1][1], \
+                slopey_time_min = prior_params[0][1][0], \
+                slopey_time_max  = prior_params[0][1][1], \
                 flat_time_alpha = prior_params[0][2][0], \
                 flat_time_beta = prior_params[0][2][1], \
                 a_alpha = prior_params[1][0][0], \
@@ -189,6 +206,7 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
                 b_beta  = prior_params[1][1][1]
 
     cdef int k, K = raw_times.shape[0]
+    cdef double frac, new_frac
     cdef double total = 0.
 
     cdef double[::1] times = _times[:K]
@@ -200,8 +218,13 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
     for k in range(0,K,2):
         total += gamma_negenergy(new_times[k],   flat_time_alpha,   flat_time_beta) \
                - gamma_negenergy(times[k],       flat_time_alpha,   flat_time_beta)
-        total += gamma_negenergy(new_times[k+1], slopey_time_alpha, slopey_time_beta) \
-               - gamma_negenergy(times[k+1],     slopey_time_alpha, slopey_time_beta)
+
+        # NOTE(mattjj): we don't score slopey times because we assume the prior
+        # is uniform, but it would look something like this:
+        # # frac = (times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
+        # # new_frac = (new_times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
+        # # total += beta_negenergy(new_frac,   slopey_time_alpha,   slopey_time_beta) \
+        # #        - beta_negenergy(frac,       slopey_time_alpha,   slopey_time_beta)
 
     # score vals
     for k in range(K//2+1):
@@ -214,7 +237,7 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
     total += gamma_negenergy(new_b, b_alpha, b_beta) \
            - gamma_negenergy(b,     b_alpha, b_beta)
 
-    # NOTE: we don't score u because we assume the prior is uniform
+    # NOTE(mattjj):: we don't score u because we assume the prior is uniform
 
     return total
 
@@ -307,3 +330,4 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
         ll += -1./2 * ((z[t,0] - y_red[t])**2 + (z[t,1] - y_green)**2) / sigmasq
 
     return ll
+

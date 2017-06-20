@@ -170,6 +170,8 @@ def plot_prior(prior_params, T_cycle, num_frames, num_slopey, num_samples):
 
     slopey_ax.set_title('slopey time prior density')
     plt.axes(slopey_ax)
-    t = np.linspace(0.01, 2, 1000)
-    plt.plot(t, np.exp(gamma_log_density(t, slopey_time_hypers, sum=False)))
+    t = np.linspace(0.01, 10, 1000)
+    slopey_time_min, slopey_time_max = slopey_time_hypers
+    plt.plot(t, np.where((slopey_time_min <= t) & (t <= slopey_time_max),
+                         1./ (slopey_time_max - slopey_time_min), 0.))
     plt.xlabel('time (sec)')

@@ -6,13 +6,19 @@ from priors import split_dwelltimes, integrate_dwelltimes, \
     beta_log_density, beta_sample, gamma_log_density, gamma_sample
 from fast import logq_diff as logq_diff_fast, propose as propose_fast
 
+def make_prior_proposer(prior_params, proposal_params, T_cycle):
+    trace_params, _ = prior_params
+    _, slopey_time_params, _ = trace_params
+    slopey_time_min, slopey_time_max = slopey_time_params
 
-def make_prior_proposer(proposal_params, T_cycle):
     trace_proposal_params, u_proposal_params, ch2_proposal_params = proposal_params
 
     def propose_cython(theta):
-        return propose_fast(theta, T_cycle, u_proposal_params, ch2_proposal_params,
-                            *trace_proposal_params)
+        return propose_fast(
+                theta,
+                T_cycle, slopey_time_min, slopey_time_max,
+                u_proposal_params, ch2_proposal_params,
+                *trace_proposal_params)
 
     def propose(theta):
         x, u, ch2_transform = theta
@@ -99,7 +105,9 @@ def make_prior_proposer(proposal_params, T_cycle):
 
     def logq_diff(theta, new_theta):
         return logq_diff_fast(
-            theta, new_theta, T_cycle, u_proposal_params, ch2_proposal_params,
+            theta, new_theta,
+            T_cycle, slopey_time_min, slopey_time_max,
+            u_proposal_params, ch2_proposal_params,
             *trace_proposal_params)
 
     return logq_diff, logq, propose_cython

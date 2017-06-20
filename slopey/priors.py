@@ -16,6 +16,10 @@ beta_lognormalizer = lambda alpha, beta: betaln(alpha, beta)
 gamma_negenergy = lambda x, alpha, beta: (alpha - 1.) * np.log(x) - beta * x
 gamma_lognormalizer = lambda alpha, beta: gammaln(alpha) - alpha * np.log(beta)
 
+uniform_negenergy = lambda x, low, high: \
+        np.where((low <= x) & (x <= high), np.log(high - low), -np.inf)
+uniform_lognormalizer = lambda low, high: 0.
+
 def make_densities(negenergy, lognormalizer):
     def log_density(x, params, sum=True):
         logprobs = negenergy(x, *params) - lognormalizer(*params)
@@ -34,6 +38,8 @@ beta_log_density, make_beta_log_density = \
     make_densities(beta_negenergy, beta_lognormalizer)
 gamma_log_density, make_gamma_log_density = \
     make_densities(gamma_negenergy, gamma_lognormalizer)
+uniform_log_density, make_uniform_log_density = \
+    make_densities(uniform_negenergy, uniform_lognormalizer)
 
 def beta_sample(params, size=None):
     alpha, beta = params
@@ -43,6 +49,9 @@ def gamma_sample(params, size=None):
     alpha, beta = params
     return np.maximum(1e-6, npr.gamma(alpha, 1./beta, size=size))
 
+def uniform_sample(params, size=None):
+    slopey_time_min, slopey_time_max = params
+    return np.maximum(1e-6, npr.uniform(slopey_time_min, slopey_time_max, size=size))
 
 ### util
 
@@ -62,8 +71,9 @@ def make_prior(prior_params):
     trace_params, ch2_transform_params = prior_params
 
     level_params, slopey_time_params, flat_time_params = trace_params
-    logp_levels, logp_slopeytimes, logp_flattimes = \
-        map(make_gamma_log_density, trace_params)
+    logp_levels = make_gamma_log_density(level_params)
+    logp_slopeytimes = make_uniform_log_density(slopey_time_params)
+    logp_flattimes = make_gamma_log_density(flat_time_params)
 
     a_params, b_params = ch2_transform_params
     logp_ch2transform_a, logp_ch2transform_b = \
@@ -86,14 +96,10 @@ def make_prior(prior_params):
 
     def sample_prior(num_slopey_bits, T_cycle):
         def sample_x(trace_params):
-            sample_dwelltimes = gamma_sample
-            sample_levels = gamma_sample
-
-            flat_times = sample_dwelltimes(flat_time_params, num_slopey_bits)
-            slopey_times = sample_dwelltimes(slopey_time_params, num_slopey_bits)
+            flat_times = gamma_sample(flat_time_params, num_slopey_bits)
+            slopey_times = uniform_sample(slopey_time_params, num_slopey_bits)
             times = integrate_dwelltimes(flat_times, slopey_times)
-            vals = sample_levels(level_params, num_slopey_bits + 1)
-
+            vals = gamma_sample(level_params, num_slopey_bits + 1)
             return times, vals
 
         def sample_ch2_transform(ch2_transform_params):
