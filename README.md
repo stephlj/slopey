@@ -25,7 +25,7 @@ There's essentially no limit to how large you set these, but for ease of impleme
 
 ## Running Steph’s Matlab code
 
-To use the information in the goodtraces.txt parameters file from pyhsmm, first run
+To use the information in the goodtraces.txt parameters file from pyhsmm (see [Traces](https://github.com/stephlj/Traces)), first run
 
 ```matlab
 ConvertGoodTracesToYAML(<datadir>)

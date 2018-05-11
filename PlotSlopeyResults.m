@@ -9,9 +9,14 @@
 % perc_dur_to_analyze field is extraneous. Removing it, and just plotting
 % everything that comes in with input_struct.
 %
+% Update 6/2017: Added a second input that takes PART OF a matrix of hand-segmented
+% values for comparison (format: each row is a trace--discarded traces are
+% excluded--first column is slopey start, second is slopey end, third is
+% duration. This function takes ONLY A SINGLE ROW)
+%
 % Steph 4/2016
 
-function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,discard,xlims)
+function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,discard,xlims,hand_segment)
 
 if ~exist('discard','var') discard = 'false'; end
 if ~exist('xlims','var') xlims = [0 0]; end
@@ -27,10 +32,12 @@ smooth_width = 5;
     % plot histograms
     function plot_histo(durations,t,subfig_pos)
         subplot('Position',subfig_pos)
-        [n,xout] = hist(durations,[0:.05:3]);
+        % [n,xout] = hist(durations,[0:.05:3]);
+        [n,xout] = hist(durations,[0:.05:5]);
         n = n./sum(n);
         bar(xout,n)
-        xlim([0 3])
+        % xlim([0 3])
+        xlim([0 5])
         title(t,'Fontsize',14)
         xlabel('Duration (sec)','Fontsize',14)
         ylabel('Frequency','Fontsize',14)
@@ -85,6 +92,11 @@ smooth_width = 5;
 
             end
             clear times vals max_red
+            % Update 6/2017: also plotting hand segmentation
+            if ~isempty(hand_segment)
+                plot([hand_segment(1) hand_segment(1)],[0 2],'--m')
+                plot([hand_segment(2) hand_segment(2)],[0 2],'--m')
+            end
         
         end
     else

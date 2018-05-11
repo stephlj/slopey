@@ -2,9 +2,18 @@
 %
 % datadir_to_analyze is a folder in HMMresults.
 %
+% Update 6/2017: Added a second input that takes a matrix of hand-segmented
+% values for comparison (format: each row is a trace--discarded traces are
+% excluded--first column is slopey start, second is slopey end, third is
+% duration.)
+%
 % Steph 4/2016
 
-function RunSlopeyAnalysis(datadir_to_analyze)
+function RunSlopeyAnalysis(datadir_to_analyze,hand_segment)
+
+if ~exist('hand_segment','var')
+    hand_segment = [];
+end
 
 samples_to_plot = 200; 
 
@@ -42,10 +51,12 @@ all_third_duration = [];
     % plot histograms
     function plot_histo(durations,t,subfig_pos)
         subplot('Position',subfig_pos)
-        [n,xout] = hist(durations,[0:.05:2]);
+        % [n,xout] = hist(durations,[0:.05:2]);
+        [n,xout] = hist(durations,[0:.05:5]);
         n = n./sum(n);
         bar(xout,n)
-        xlim([0 2])
+        % xlim([0 2])
+        xlim([0 5])
         title(t,'Fontsize',14)
         xlabel('Duration (sec)','Fontsize',14)
         ylabel('Frequency','Fontsize',14)
@@ -64,8 +75,11 @@ while k <= length(results)
     
     if ~isfield(results{k},'discard') || (isfield(results{k},'discard') && ~strcmpi(results{k}.discard,'true'))
     
-        [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,'false',xlims);
-
+        if ~isempty(hand_segment)
+            [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,'false',xlims,hand_segment(k,:));
+        else
+            [first_duration, second_duration, third_duration] = PlotSlopeyResults(currstruct,'false',xlims,[]);
+        end
         all_first_duration = [all_first_duration, first_duration];
         all_second_duration = [all_second_duration, second_duration];
         all_third_duration = [all_third_duration, third_duration];
