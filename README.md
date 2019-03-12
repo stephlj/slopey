@@ -33,7 +33,17 @@ ConvertGoodTracesToYAML(<datadir>)
 
 Ensure that datadir has a global params.yml file.
 
-Because Steph does have a crazy directory structure with spaces, you will need to create a symbolic link to each data directory. In Terminal, run:
+Because Steph does have a crazy directory structure with spaces, you will need to run the build command as above. If you try to run slopey either through the Terminal
+or by running RunSlopeyAnalysis in Matlab, and get:
+
+```
+Compiling low-level code
+python: can't open file 'setup.py': [Errno 2] No such file or directory
+```
+
+then re-build.
+
+With a crazy directory structure with spaces like Steph's, you will also need to create a symbolic link to each data directory. In Terminal, run:
 
 ```bash
 cd “~/Documents/UCSF/.../Symlinks_Data” 
@@ -44,7 +54,7 @@ To run slopey, either run in the Terminal:
 ```bash
 ./Analyze_Slopey.sh Symlinks_Data/DataDirName
 ```
-with optional additional arguments: clean, -dr (prints debug info from make), -j4 (runs multi-threaded). Or, run in Matlab:
+with optional additional arguments: clean, -dr (prints debug info from make), -j4 (runs multi-threaded; the default in RunSlopeyAnalysis is -j2). Or, run in Matlab:
 
 ```matlab
 RunSlopeyAnalysis(DataDirName)
@@ -64,6 +74,11 @@ Fix: edit the *_Results.params.yml file (or create a new one) such that
 translocation_frame_guesses: [x1,x2,x3]
 ```
 has reasonable values for x1, x2, x3, etc.
+
+Once slopey is running successfully, it will print out accept proportions for each trace. Optimally they should be ~0.2.
+
+Cropping: Crop traces as little as possible. The more information slopey has about each flat bit's (noisy) distribution of intensity values, the better it will find the intervening slopey bits.
+This is somewhat in contrast to the discrete-time HMM based on pyhsmm (see [Traces](https://github.com/stephlj/Traces) and [pyhsmm](https://github.com/mattjj/pyhsmm)), where long noisy flat bits are likely to be assigned multiple states.
 
 ## long-term possible todos
 - [ ] learn the noise parameters
