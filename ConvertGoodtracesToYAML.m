@@ -3,6 +3,11 @@
 % For converting parameters like discard, start and end times to slopey
 % params files.
 %
+% Update 3/2019: Since it's actually better to crop as little as possible
+% with slopey, commented out the lines that transfer start and end data to
+% the YAML files. Also edited load.py to not use start and end info in the
+% pyhsmm Results.mat files used for initialization.
+%
 % Steph 6/2016
 
 function ConvertGoodtracesToYAML(dirname)
@@ -42,16 +47,16 @@ if strcmpi(overwrite,'y')
                 if ~strcmpi(currtrace(end-3:end-1),'mat')
                     [start_index,start_end] = regexpi(currtrace,'start=\d*');
                     [end_index,end_end] = regexpi(currtrace,'end=\d*');
-                    if ~isempty(start_index)
-                        start_str = currtrace(start_index:start_end);
-                        start_val = str2num(start_str(strfind(start_str,'=')+1:end));
-                        EditYAMLfile(fullfile(dirname,strcat(trace_name,'.params.yml')),'start',start_val);
-                    end
-                    if ~isempty(end_index)
-                        end_str = currtrace(end_index:end_end);
-                        end_val = str2num(end_str(strfind(end_str,'=')+1:end));
-                        EditYAMLfile(fullfile(dirname,strcat(trace_name,'.params.yml')),'end',end_val);
-                    end
+%                     if ~isempty(start_index)
+%                         start_str = currtrace(start_index:start_end);
+%                         start_val = str2num(start_str(strfind(start_str,'=')+1:end));
+%                         EditYAMLfile(fullfile(dirname,strcat(trace_name,'.params.yml')),'start',start_val);
+%                     end
+%                     if ~isempty(end_index)
+%                         end_str = currtrace(end_index:end_end);
+%                         end_val = str2num(end_str(strfind(end_str,'=')+1:end));
+%                         EditYAMLfile(fullfile(dirname,strcat(trace_name,'.params.yml')),'end',end_val);
+%                     end
                 end
                 if p~=length(starts)+1
                     index = starts(p)+1;
