@@ -1,15 +1,17 @@
-# prior hyperparameters
-intensity_hypers: 1., 2.5
-# slopey and flat time hypers: a, b where mean = a/b, a/b^2
-slopey_time_hypers: 2., 3.
+## prior hyperparameters
+# slopey time hypers: time_min, time_max
+slopey_time_hypers: 0.14, 4.5
+# flat time hypers: a, b where mean = a/b, var = a/b^2
 flat_time_hypers: 1., 1./10
+# other hyperparameters
+intensity_hypers: 1., 2.5
 ch2_transform_hypers: (3., 3.), (1., 5.)
 
-# inference parameters
+## inference parameters
 proposal_params: (1e3, 1e3), 1e3, 1e3
 num_iterations: 100000
 
-# camera model parameters
+## camera model parameters
 # 7.4 fps
 T_cycle: 0.1356
 T_blank: 0.0356

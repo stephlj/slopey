@@ -73,7 +73,7 @@ def model1(model_params, proposal_params, data, initializer, animate=False):
     joint_distn = (logp_diff, log_p)
 
     # set up inference
-    proposal_distn = make_prior_proposer(proposal_params, T_cycle)
+    proposal_distn = make_prior_proposer(prior_params, proposal_params, T_cycle)
 
     # make a callback to print how often proposals are accepted
     accepts = []
