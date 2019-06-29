@@ -37,6 +37,7 @@ ALL = $(RESULTS) $(MATLAB_RESULTS)  # $(FIGURES) $(MATLAB_ALL_RESULTS)
 
 DISCARD = $(shell $(ROOT)/list_discards.py $(SPECIFIC_PARAMS))
 DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
+DISCARD_MAT = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.mat))
 # DISCARD_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=.pdf))
 # DISCARD_PRIOR_FIG = $(addprefix $(FIGDIR)/, $(DISCARD:.params.yml=_prior.pdf))
 
@@ -45,7 +46,7 @@ DISCARD_PKL = $(addprefix $(RESULTSDIR)/, $(DISCARD:.params.yml=.results.pkl))
 .PHONY: all clean clean_discards
 all: $(ALL)
 clean: ; rm -f $(ALL) $(MATLAB_ALL_RESULTS)
-clean_discards: ; rm -f $(DISCARD_PKL) $(MATLAB_ALL_RESULTS)
+clean_discards: ; rm -f $(DISCARD_PKL) $(DISCARD_MAT) $(MATLAB_ALL_RESULTS)
 
 .SECONDEXPANSION:
 $(RESULTSDIR)/%.results.pkl: $(SCRIPTS)/analyze_trace.py $(DATADIR)/%.mat \

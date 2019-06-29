@@ -15,7 +15,8 @@ if ~exist('hand_segment','var')
     hand_segment = [];
 end
 
-samples_to_plot = 200; 
+% samples_to_plot = 200; 
+samples_to_plot = 10000;
 
 fig_pos = [100,400,900,700];
 figure('Position',fig_pos)

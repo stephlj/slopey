@@ -20,6 +20,7 @@ function [first_dur, second_dur, third_dur] = PlotSlopeyResults(input_struct,dis
 
 if ~exist('discard','var') discard = 'false'; end
 if ~exist('xlims','var') xlims = [0 0]; end
+if ~exist('hand_segment') hand_segment = []; end
 
 smooth_width = 5;
 
@@ -32,12 +33,12 @@ smooth_width = 5;
     % plot histograms
     function plot_histo(durations,t,subfig_pos)
         subplot('Position',subfig_pos)
-        % [n,xout] = hist(durations,[0:.05:3]);
-        [n,xout] = hist(durations,[0:.05:5]);
+        xmax = 6;
+        [n,xout] = hist(durations,[0:.05:xmax]);
         n = n./sum(n);
         bar(xout,n)
-        % xlim([0 3])
-        xlim([0 5])
+        % xlim([0 5])
+        xlim([0 xmax])
         title(t,'Fontsize',14)
         xlabel('Duration (sec)','Fontsize',14)
         ylabel('Frequency','Fontsize',14)
