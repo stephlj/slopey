@@ -1,5 +1,3 @@
-![Animation of the Metropolis-Hastings algorithm running](MHwanderAug04_3_371.avi)
-
 # Quantification of single-molecule FRET trajectories containing non-instantaneous transitions
 
 Slopey was written to handle smFRET data that consist of relatively long-lived “flat bits,” where the intensity values appear to be Gaussian scatter around a mean value (that is, they seem to be
