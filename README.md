@@ -4,7 +4,8 @@ Slopey was written to handle smFRET data that consist of relatively long-lived �
 where the intensity values appear to be Gaussian scatter around a mean value (that is, they seem to be
 well described as a constant intensity value with some noise), separated by “slopey” bits, 
 which, though fast, are not instantaneous jumps. Current HMM fitting techniques in the field 
-assume Gaussian emissions with instantaneous transitions. An introduction to Slopey can be
+assume Gaussian emissions with instantaneous transitions. An introduction to Slopey and
+its application to the quantification of timeseries data for a particular enzyme can be
 found [here](https://stephlj.github.io/img/SlopeySlides.pdf).
 
 ## Building
