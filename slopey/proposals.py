@@ -1,10 +1,11 @@
 from __future__ import division
+from __future__ import absolute_import
 import numpy as np
 import os
 
-from priors import split_dwelltimes, integrate_dwelltimes, \
+from slopey.priors import split_dwelltimes, integrate_dwelltimes, \
     beta_log_density, beta_sample, gamma_log_density, gamma_sample
-from fast import logq_diff as logq_diff_fast, propose as propose_fast
+from slopey.fast import logq_diff as logq_diff_fast, propose as propose_fast
 
 def make_prior_proposer(prior_params, proposal_params, T_cycle):
     trace_params, _ = prior_params

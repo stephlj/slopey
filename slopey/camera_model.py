@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import absolute_import
 import numpy as np
 import numpy.random as npr
 from scipy.special import gammaln
@@ -6,7 +7,7 @@ from itertools import cycle, chain
 from functools import partial
 from operator import itemgetter
 
-from fast import loglike as loglike_fast
+from slopey.fast import loglike as loglike_fast
 
 
 def flip(x):

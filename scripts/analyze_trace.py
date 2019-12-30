@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 from __future__ import division
+from __future__ import print_function
 import numpy.random as npr
 import sys
-import cPickle as pickle
+from functools import reduce
+try:
+  import cPickle as pickle
+except ImportError:
+  import pickle
 
 from slopey.load import load_data, load_params
 from slopey.analysis import model1, make_hmm_fit_initializer
@@ -42,7 +47,7 @@ if __name__ == "__main__":
         datafile, global_paramfile, specific_paramfile, outfile = sys.argv[1:]
     else:
         argspec = '{} raw_data.mat global_params.yml [specific_params.yml] outfile.pkl'
-        print >>sys.stderr, argspec.format(sys.argv[0])
+        print(argspec.format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
 
     data, defaults = load_data(datafile)
@@ -51,7 +56,7 @@ if __name__ == "__main__":
 
     if 'discard' in params:
         if params['discard']:
-            print '...skipping {}'.format(datafile)
+            print('...skipping {}'.format(datafile))
             sys.exit(0)
         else:
             del params['discard']
@@ -59,5 +64,5 @@ if __name__ == "__main__":
     npr.seed(0)
     samples = run_analysis(data, **params)
 
-    with open(outfile, 'w') as outfile:
+    with open(outfile, 'wb') as outfile:
         pickle.dump({'params':params, 'data':data, 'samples':samples}, outfile, protocol=-1)

@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 from __future__ import division
+from __future__ import print_function
 import numpy.random as npr
 import sys
-import cPickle as pickle
+try:
+  import cPickle as pickle
+except ImportError:
+  import pickle
 import matplotlib.pyplot as plt
 from os.path import splitext, isfile
 
@@ -13,14 +17,14 @@ if __name__ == "__main__":
     if len(sys.argv) == 3:
         resultsfile, outfile = sys.argv[1:]
     else:
-        print >>sys.stderr, '{} results.pkl out.pdf'.format(sys.argv[0])
+        print('{} results.pkl out.pdf'.format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
 
     if not isfile(resultsfile):
-        print '...skipping {}'.format(resultsfile)
+        print('...skipping {}'.format(resultsfile))
         sys.exit(0)
 
-    with open(resultsfile) as infile:
+    with open(resultsfile, 'rb') as infile:
         results = pickle.load(infile)
 
     params, samples, data = results['params'], results['samples'], results['data']

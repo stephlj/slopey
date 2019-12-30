@@ -3,7 +3,10 @@ from __future__ import division
 import numpy as np
 import sys
 import os
-import cPickle as pickle
+try:
+  import cPickle as pickle
+except ImportError:
+  import pickle
 from glob import glob
 from os.path import join, basename, isfile, isdir, exists
 from scipy.io import savemat
@@ -12,7 +15,7 @@ if os.getenv('USE_TQDM'): from tqdm import tqdm
 else: tqdm = lambda x: x
 
 def load_results(resultsfile):
-    with open(resultsfile) as infile:
+    with open(resultsfile, 'rb') as infile:
         results = pickle.load(infile)
     experiment_name = basename(resultsfile).split('.')[0]
     return experiment_name, flatten_results(results)
@@ -33,10 +36,11 @@ if __name__ == '__main__':
     if len(sys.argv) == 3:
         resultsdir, outfile = sys.argv[1:]
     else:
-        print >>sys.stderr, '{} results_matfile_or_directory out.mat'.format(sys.argv[0])
+        print('{} results_matfile_or_directory out.mat'.format(sys.argv[0]),
+              file=sys.stderr)
 
     if not exists(resultsdir):
-        print '...skipping {}'.format(resultsdir)
+        print('...skipping {}'.format(resultsdir))
         sys.exit(0)
 
     if isfile(resultsdir):

@@ -1,10 +1,11 @@
 from __future__ import division
+from __future__ import absolute_import
 import numpy as np
 import matplotlib.pyplot as plt
 
-from camera_model import flip, red_to_green
-from util import interleave
-from priors import make_prior, gamma_log_density
+from slopey.camera_model import flip, red_to_green
+from slopey.util import interleave
+from slopey.priors import make_prior, gamma_log_density
 
 # TODO these time axes might be off by one T_cycle
 
@@ -154,7 +155,7 @@ def plot_prior(prior_params, T_cycle, num_frames, num_slopey, num_samples):
 
     red_ax.set_title('red channel prior samples')
     green_ax.set_title('green channel prior samples')
-    for _ in xrange(num_samples):
+    for _ in range(num_samples):
         sample = prior_sample(num_slopey, T_cycle)
         plt.axes(red_ax)
         plot_trace_sample(sample, T_cycle, num_frames, plot_green=False)

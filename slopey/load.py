@@ -1,9 +1,6 @@
 from __future__ import division
 import numpy as np
 from scipy.io import loadmat
-from re import compile
-from string import strip
-from collections import defaultdict
 import yaml
 
 

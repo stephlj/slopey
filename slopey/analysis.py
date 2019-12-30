@@ -1,14 +1,15 @@
 from __future__ import division
+from __future__ import absolute_import
 import numpy as np
 import numpy.random as npr
 import scipy.optimize
 
-from priors import make_prior
-from proposals import make_prior_proposer
-from camera_model import make_camera_model
-from samplers import run_mh
-from plotting import make_animation_callback
-from util import ensure_2d, interleave
+from slopey.priors import make_prior
+from slopey.proposals import make_prior_proposer
+from slopey.camera_model import make_camera_model
+from slopey.samplers import run_mh
+from slopey.plotting import make_animation_callback
+from slopey.util import ensure_2d, interleave
 
 
 ### util
@@ -91,7 +92,7 @@ def model1(model_params, proposal_params, data, initializer, animate=False):
     def run(num_iter):
         new_samples = run_mh(samples[-1], joint_distn, proposal_distn, num_iter, callback)
         samples.extend(new_samples)
-        print 'accept proportion: %0.3f' % np.mean(accepts)
+        print('accept proportion: %0.3f' % np.mean(accepts))
         return samples
 
     return run

@@ -1,11 +1,12 @@
 from __future__ import division
+from __future__ import absolute_import
 import numpy as np
 import numpy.random as npr
 from scipy.special import gammaln, betaln
 import matplotlib.pyplot as plt
 
-from util import interleave
-from fast import logp_diff as logp_diff_fast
+from slopey.util import interleave
+from slopey.fast import logp_diff as logp_diff_fast
 
 
 ### primitive distributions

@@ -1,4 +1,5 @@
 # distutils: extra_compile_args = -O3 -w -ffast-math
+# distutils: extra_link_args = -lm
 # distutils: libraries = gsl
 # distutils: include_dirs = /opt/local/include
 # distutils: library_dirs = /opt/local/lib
@@ -12,6 +13,9 @@ from libc.math cimport log, exp
 cdef extern from "gsl/gsl_sf_gamma.h":
     double gsl_sf_lngamma(double x)
     double gsl_sf_lnbeta(double a, double b)
+
+cdef extern from "gsl/gsl_sf_psi.h":
+    cdef double gsl_sf_psi_1(double x);
 
 cdef extern from "gsl/gsl_rng.h":
     ctypedef struct gsl_rng_type
