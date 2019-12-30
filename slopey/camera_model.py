@@ -22,10 +22,10 @@ def red_to_green(x, transform_params):
 
 
 def make_camera_model(camera_params):
-    T_cycle, T_blank, noise_sigmasq = camera_params
+    T_cycle, T_blank = camera_params
 
     def loglike(z, theta):
-        return loglike_fast(theta, z, noise_sigmasq, T_cycle, T_blank)
+        return loglike_fast(theta, z, T_cycle, T_blank)
 
     def noiseless_measurements(F, u, num_frames):
         starts = u + np.linspace(0, num_frames * T_cycle, num_frames, endpoint=False)

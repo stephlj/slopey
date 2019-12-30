@@ -8,14 +8,15 @@
 import numpy as np
 cimport numpy as np
 
-from libc.math cimport log, exp
+from libc.math cimport log, exp, log1p
 
 cdef extern from "gsl/gsl_sf_gamma.h":
     double gsl_sf_lngamma(double x)
     double gsl_sf_lnbeta(double a, double b)
 
 cdef extern from "gsl/gsl_sf_psi.h":
-    cdef double gsl_sf_psi_1(double x);
+    cdef double gsl_sf_psi(double x);    # digamma
+    cdef double gsl_sf_psi_1(double x);  # trigamma
 
 cdef extern from "gsl/gsl_rng.h":
     ctypedef struct gsl_rng_type
@@ -45,6 +46,9 @@ cdef double[::1] _new_vals = np.zeros(NUM_SLOPEY_MAX//2+1)
 cdef int NUM_FRAMES_MAX = 50000
 cdef double[::1] _y_red = np.zeros(NUM_FRAMES_MAX)
 
+def set_seed(long seed):
+    gsl_rng_set(r, seed)
+
 ### proposals
 
 cdef inline void diff(double[::1] a, double[::1] out):
@@ -71,12 +75,14 @@ def propose(
         double slopey_time_min, double slopey_time_max,
         # proposal scale parameters
         double u_scale, double ch2_scale,
+        double sigma_scale,
         double val_scale, double time_scale):
     cdef double[::1] raw_times = theta[0][0]
     cdef double[::1] vals = theta[0][1]
     cdef double u = theta[1]
     cdef double a = theta[2][0]
     cdef double b = theta[2][1]
+    cdef double sigma = theta[3]
 
     cdef int k, K = raw_times.shape[0]
     cdef double frac
@@ -104,13 +110,19 @@ def propose(
     new_a = dmax(EPS, gamma(r, a * ch2_scale, 1./ch2_scale))
     new_b = dmax(EPS, gamma(r, b * ch2_scale, 1./ch2_scale))
 
+    # propose new sigma
+    cdef double new_sigma
+    new_sigma = dmax(EPS, gamma(r, sigma * sigma_scale, 1./sigma_scale))
+
     # propose new u
     frac = u / T_cycle
     cdef double new_u = T_cycle * clip(beta(r, frac * u_scale, (1.-frac) * u_scale),
                                        EPS, 1.-EPS)
 
     return ((np.array(new_times, copy=True), np.array(new_vals, copy=True)),
-            new_u, (new_a, new_b))
+            new_u,
+            (new_a, new_b),
+            new_sigma)
 
 ### acceptance prob
 
@@ -120,6 +132,19 @@ cdef inline double gamma_log_density(double x, double alpha, double beta):
 cdef inline double beta_log_density(double x, double alpha, double beta):
     return (alpha-1.)*log(x) + (beta-1.)*log(1.-x) - gsl_sf_lnbeta(alpha, beta)
 
+cdef inline double gaussian_negenergy(double x):
+  return -0.5 * x ** 2  # factored out location / scale
+
+cdef inline double gaussian_lognorm(double sigma):
+  return 0.5 * log(2 * PI) + log(sigma)
+
+cdef inline double student_t_negenergy(double x, double nu):
+  return -(nu + 1.) / 2. * log1p(x ** 2 / nu)
+
+cdef inline double student_t_lognorm(double sigma, double nu):
+  return (0.5 * log(nu * PI) + gsl_sf_lngamma(nu / 2.)
+          - gsl_sf_lngamma((nu + 1.) / 2.)) + log(sigma)
+
 def logq_diff(
         # inputs
         tuple theta, tuple new_theta,
@@ -128,18 +153,21 @@ def logq_diff(
         double slopey_time_min, double slopey_time_max,
         # proposal scale parameters
         double u_scale, double ch2_scale,
+        double sigma_scale,
         double val_scale, double time_scale):
     cdef double[::1] raw_times = theta[0][0]
     cdef double[::1] vals = theta[0][1]
     cdef double u = theta[1]
     cdef double a = theta[2][0]
     cdef double b = theta[2][1]
+    cdef double sigma = theta[3]
 
     cdef double[::1] new_raw_times = new_theta[0][0]
     cdef double[::1] new_vals = new_theta[0][1]
     cdef double new_u = new_theta[1]
     cdef double new_a = new_theta[2][0]
     cdef double new_b = new_theta[2][1]
+    cdef double new_sigma = new_theta[3]
 
     cdef int k, K = raw_times.shape[0]
     cdef double frac, new_frac
@@ -166,10 +194,14 @@ def logq_diff(
                - gamma_log_density(new_vals[k], vals[k] * val_scale, val_scale)
 
     # score ch2
-    total += gamma_log_density(a,     ch2_scale*new_a, ch2_scale) \
-           + gamma_log_density(b,     ch2_scale*new_b, ch2_scale)
-    total -= gamma_log_density(new_a, ch2_scale*a,     ch2_scale) \
-           + gamma_log_density(new_b, ch2_scale*b,     ch2_scale)
+    total += gamma_log_density(a,     ch2_scale * new_a, ch2_scale) \
+           + gamma_log_density(b,     ch2_scale * new_b, ch2_scale)
+    total -= gamma_log_density(new_a, ch2_scale * a,     ch2_scale) \
+           + gamma_log_density(new_b, ch2_scale * b,     ch2_scale)
+
+    # score sigma
+    total += gamma_log_density(sigma,     sigma_scale * new_sigma, sigma_scale)
+    total -= gamma_log_density(new_sigma, sigma_scale * sigma,     sigma_scale)
 
     # score u
     frac = u / T_cycle
@@ -185,18 +217,20 @@ cdef inline double gamma_negenergy(double x, double alpha, double beta):
 cdef inline double beta_negenergy(double x, double alpha, double beta):
     return (alpha-1.)*log(x) - (beta-1) * log(1.-x)
 
-def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
+def log_prior_diff(tuple theta, tuple new_theta, tuple prior_params):
     cdef double[::1] raw_times = theta[0][0]
     cdef double[::1] vals = theta[0][1]
     cdef double u = theta[1]
     cdef double a = theta[2][0]
     cdef double b = theta[2][1]
+    cdef double sigma = theta[3]
 
     cdef double[::1] new_raw_times = new_theta[0][0]
     cdef double[::1] new_vals = new_theta[0][1]
     cdef double new_u = new_theta[1]
     cdef double new_a = new_theta[2][0]
     cdef double new_b = new_theta[2][1]
+    cdef double new_sigma = new_theta[3]
 
     cdef double level_alpha = prior_params[0][0][0], \
                 level_beta  = prior_params[0][0][1], \
@@ -241,6 +275,10 @@ def logp_diff(tuple theta, tuple new_theta, tuple prior_params):
     total += gamma_negenergy(new_b, b_alpha, b_beta) \
            - gamma_negenergy(b,     b_alpha, b_beta)
 
+    # score sigma according to Jeffreys prior on scale, p(sigma) \propto 1/sigma
+    total += -log(new_sigma) \
+           - -log(sigma)
+
     # NOTE(mattjj):: we don't score u because we assume the prior is uniform
 
     return total
@@ -264,12 +302,14 @@ cdef inline void zero_out(double[::1] a):
     for k in range(K):
         a[k] = 0.
 
-def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double T_blank):
+def loglike(tuple theta, double[:,::1] z, double T_cycle, double T_blank):
     cdef double u = theta[1]
     cdef double a = theta[2][0]
     cdef double b = theta[2][1]
     cdef double[::1] times = theta[0][0] - u
     cdef double[::1] vals = theta[0][1]
+    cdef double sigma = theta[3]
+
     cdef int num_frames = z.shape[0]
 
     cdef double[::1] y_red = _y_red[:num_frames]
@@ -324,14 +364,27 @@ def loglike(tuple theta, double[:,::1] z, double sigmasq, double T_cycle, double
             # ready to move on to the next frame
             t += 1
 
-    ### compute green channel and loglike under gaussian model
+    ### compute green channel and loglike under noise model
 
-    cdef double ll = 2*num_frames*(-1./2 * log(PI) - 1./2 * log(sigmasq))
+    cdef double ll = 0.
     cdef double y_green
     cdef double x_red_max = amax(vals)
     for t in range(num_frames):
         y_green = -a * y_red[t] + (b + a*x_red_max)
-        ll += -1./2 * ((z[t,0] - y_red[t])**2 + (z[t,1] - y_green)**2) / sigmasq
+
+        # # gaussian noise model
+        # ll += (gaussian_negenergy((z[t,0] - y_red[t]) / sigma) +
+        #        gaussian_negenergy((z[t,1] - y_green)  / sigma))
+
+        # student-t noise model (with nu=1. so it's a Cauchy)
+        ll += (student_t_negenergy((z[t,0] - y_red[t]) / sigma, 1.) +
+               student_t_negenergy((z[t,1] - y_green)  / sigma, 1.))
+
+    # # gaussian noise model
+    # ll -= 2 * num_frames * gaussian_lognorm(sigma)
+
+    # student-t noise model
+    ll -= 2 * num_frames * student_t_lognorm(sigma, 1.)
 
     return ll
 

@@ -7,9 +7,8 @@ if os.getenv('USE_TQDM'): from tqdm import tqdm
 else: tqdm = lambda x: x
 
 
-def run_mh(init_theta, joint_distn, proposal_distn, N, callback=None):
-    logp_diff, log_p = joint_distn
-    logq_diff, log_q, propose = proposal_distn
+def run_mh(init_theta, logp_diff, proposal_distn, N, callback=None):
+    logq_diff, propose = proposal_distn
 
     def log_acceptance_prob(theta, new_theta):
         score = logp_diff(theta, new_theta) + logq_diff(theta, new_theta)

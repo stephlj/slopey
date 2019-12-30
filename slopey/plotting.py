@@ -37,7 +37,7 @@ def plot_trace(x, time_max=None, time_offset=0., mark_changepoints=True, **plot_
 
 def plot_trace_sample(sample, T_cycle, num_frames, color=None,
                       plot_red=True, plot_green=True, **kwargs):
-    x, u, ch2_transform = sample
+    x, u, ch2_transform, _ = sample
     time_max = T_cycle * num_frames
 
     if plot_red:
@@ -70,7 +70,7 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
         from scipy.stats import gaussian_kde
 
         def get_slopey_durations(sample):
-            x, u, ch2_transform = sample
+            x, u, ch2_transform, _ = sample
             times, vals = x
             return np.diff(times)[::2]
 
@@ -79,8 +79,8 @@ def plot_samples(samples, z, T_cycle, warmup=None, use_every_k_samples=50):
         num_slopey = sampled_durations.shape[1]
 
         for slopey_idx, durations in enumerate(sampled_durations.T):
-            plt.plot(t, gaussian_kde(durations)(t)/num_slopey, label=ordinal(slopey_idx+1))
-        plt.plot(t, gaussian_kde(sampled_durations.ravel())(t), ':', label='overall')
+            plt.plot(t, gaussian_kde(durations, 0.25)(t)/num_slopey, label=ordinal(slopey_idx+1))
+        plt.plot(t, gaussian_kde(sampled_durations.ravel(), 0.25)(t), ':', label='overall')
 
         plt.legend(loc='best')
         plt.xlabel('inferred slopey bit durations (seconds)')

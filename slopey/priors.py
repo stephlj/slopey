@@ -6,7 +6,7 @@ from scipy.special import gammaln, betaln
 import matplotlib.pyplot as plt
 
 from slopey.util import interleave
-from slopey.fast import logp_diff as logp_diff_fast
+from slopey.fast import log_prior_diff as log_prior_diff_fast
 
 
 ### primitive distributions
@@ -70,30 +70,9 @@ def integrate_dwelltimes(flat_times, slopey_times):
 
 def make_prior(prior_params):
     trace_params, ch2_transform_params = prior_params
-
     level_params, slopey_time_params, flat_time_params = trace_params
-    logp_levels = make_gamma_log_density(level_params)
-    logp_slopeytimes = make_uniform_log_density(slopey_time_params)
-    logp_flattimes = make_gamma_log_density(flat_time_params)
 
     a_params, b_params = ch2_transform_params
-    logp_ch2transform_a, logp_ch2transform_b = \
-        map(make_gamma_log_density, ch2_transform_params)
-
-    def logp_x(x):
-        times, vals = x
-        flat_times, slopey_times = split_dwelltimes(times)
-        return logp_levels(vals) + logp_slopeytimes(slopey_times) \
-                + logp_flattimes(flat_times)
-
-    def logp_ch2_transform(ch2_transform):
-        a, b = ch2_transform
-        return logp_ch2transform_a(a) + logp_ch2transform_b(b)
-
-    def log_prior_density(theta):
-        # NOTE: u is assumed uniform and so doesn't contribute
-        x, u, ch2_transform = theta
-        return logp_x(x) + logp_ch2_transform(ch2_transform)
 
     def sample_prior(num_slopey_bits, T_cycle):
         def sample_x(trace_params):
@@ -114,9 +93,12 @@ def make_prior(prior_params):
         u = sample_u()
         ch2_transform = sample_ch2_transform(ch2_transform_params)
 
-        return x, u, ch2_transform
+        # just return sigma as a constant, since we use an improper prior
+        sigma = np.sqrt(0.2)
 
-    def logp_diff(theta, new_theta):
-        return logp_diff_fast(theta, new_theta, prior_params)
+        return x, u, ch2_transform, sigma
 
-    return logp_diff, log_prior_density, sample_prior
+    def log_prior_diff(theta, new_theta):
+        return log_prior_diff_fast(theta, new_theta, prior_params)
+
+    return log_prior_diff, sample_prior
