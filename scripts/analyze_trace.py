@@ -11,6 +11,7 @@ except ImportError:
 
 from slopey.load import load_data, load_params
 from slopey.analysis import model1, make_hmm_fit_initializer
+from slopey.fast import set_seed
 
 
 def merge_dicts(*dcts):
@@ -21,12 +22,12 @@ def run_analysis(
         data, start, end, translocation_frame_guesses,
         num_iterations, proposal_params,
         intensity_hypers, slopey_time_hypers, flat_time_hypers, ch2_transform_hypers,
-        T_cycle, T_blank, noise_sigmasq):
+        T_cycle, T_blank):
 
     # concatenate hyperparameters, make gaussian observation model
     trace_params = intensity_hypers, slopey_time_hypers, flat_time_hypers
     prior_params = trace_params, ch2_transform_hypers
-    camera_params = T_cycle, T_blank, noise_sigmasq
+    camera_params = T_cycle, T_blank
     model_params = prior_params, camera_params
 
     # create initializer function
@@ -62,6 +63,7 @@ if __name__ == "__main__":
             del params['discard']
 
     npr.seed(0)
+    set_seed(0)
     samples = run_analysis(data, **params)
 
     with open(outfile, 'wb') as outfile:

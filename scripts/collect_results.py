@@ -23,13 +23,15 @@ def load_results(resultsfile):
 
 def flatten_results(results):
     params, data, samples = results['params'], results['data'], results['samples']
-    x_samples, u_samples, ch2_samples = zip(*samples)
+    x_samples, u_samples, ch2_samples, sigma_samples = zip(*samples)
     times_samples, vals_samples = map(np.array, zip(*x_samples))
     u_samples, ch2_samples = map(np.array, (u_samples, ch2_samples))
+    sigma_samples = np.array(sigma_samples)
 
     return {'params': params, 'data': data,
             'times_samples': times_samples, 'vals_samples': vals_samples,
-            'u_samples': u_samples, 'ch2_samples': ch2_samples}
+            'u_samples': u_samples, 'ch2_samples': ch2_samples,
+            'sigma_samples': sigma_samples}
 
 
 if __name__ == '__main__':

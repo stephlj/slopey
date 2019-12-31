@@ -23,10 +23,6 @@ def fit_ch2_lstsq(ch1, ch2, fudge=1e-2):
 
 ### initializers
 
-def make_prior_initializer(num_slopey, T_cycle):
-    return lambda: prior_sample(num_slopey, T_cycle)
-
-
 def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, end, translocation_duration=0.4):
     translocation_frame_guesses = np.atleast_1d(translocation_frame_guesses)
 
@@ -46,7 +42,10 @@ def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, 
     ch2_vals = np.maximum(1e-3, block_averages(1))
     a, b = fit_ch2_lstsq(ch1_vals, ch2_vals)
 
-    return lambda: ((times, ch1_vals), T_cycle * npr.uniform(), (a, b))
+    # set initial sigma to be a constant
+    sigma = np.sqrt(0.2)
+
+    return lambda: ((times, ch1_vals), T_cycle * npr.uniform(), (a, b), sigma)
 
 
 ### models paired with inference algorithms
@@ -54,24 +53,16 @@ def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, 
 def model1(model_params, proposal_params, data, initializer, animate=False):
     prior_params, camera_params = model_params
     data = ensure_2d(data)
-    T_cycle, _, _ = camera_params
+    T_cycle, _ = camera_params
 
     # build the model densities, a prior and a likelihood
-    log_prior_diff, log_prior_density, prior_sample = make_prior(prior_params)
+    log_prior_diff, _ = make_prior(prior_params)
     camera_loglike = make_camera_model(camera_params)
 
-    # define the joint distribution as the prior times the likelihood
-    def log_p(theta):
-        return camera_loglike(data, theta) + log_prior_density(theta)
-
-    # TODO don't want to have to define this here! there should be no new_theta
-    # here. put camera_loglike into cython, so then this whole logjoint_diff
-    # function can be cythonized
+    # TODO could move logp_diff (not just log_prior_diff) into cython
     def logp_diff(theta, new_theta):
         return log_prior_diff(theta, new_theta) \
             + camera_loglike(data, new_theta) - camera_loglike(data, theta)
-
-    joint_distn = (logp_diff, log_p)
 
     # set up inference
     proposal_distn = make_prior_proposer(prior_params, proposal_params, T_cycle)
@@ -90,7 +81,7 @@ def model1(model_params, proposal_params, data, initializer, animate=False):
     # make a runner function
     samples = [initializer()]
     def run(num_iter):
-        new_samples = run_mh(samples[-1], joint_distn, proposal_distn, num_iter, callback)
+        new_samples = run_mh(samples[-1], logp_diff, proposal_distn, num_iter, callback)
         samples.extend(new_samples)
         print('accept proportion: %0.3f' % np.mean(accepts))
         return samples
