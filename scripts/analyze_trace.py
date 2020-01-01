@@ -18,6 +18,7 @@ def merge_dicts(*dcts):
     return reduce(lambda d1, d2: dict(d1, **d2), dcts)
 
 
+# TODO get rid of slopey_time_hypers
 def run_analysis(
         data, start, end, translocation_frame_guesses,
         num_iterations, proposal_params,

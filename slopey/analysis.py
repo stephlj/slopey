@@ -50,19 +50,21 @@ def make_hmm_fit_initializer(T_cycle, translocation_frame_guesses, data, start, 
 
 ### models paired with inference algorithms
 
-def model1(model_params, proposal_params, data, initializer, animate=False):
+def model1(model_params, proposal_params, datas, initializer, animate=False):
     prior_params, camera_params = model_params
-    data = ensure_2d(data)
     T_cycle, _ = camera_params
 
     # build the model densities, a prior and a likelihood
-    log_prior_diff, _ = make_prior(prior_params)
+    global_log_prior_diff, local_log_prior_diff, _ = make_prior(prior_params)
     camera_loglike = make_camera_model(camera_params)
 
-    # TODO could move logp_diff (not just log_prior_diff) into cython
     def logp_diff(theta, new_theta):
-        return log_prior_diff(theta, new_theta) \
-            + camera_loglike(data, new_theta) - camera_loglike(data, theta)
+        tot = 0.
+        tot += global_log_prior_diff(theta.globals, new_theta.globals)
+        for local_vars, new_local_vars, data in zip(theta.locals, new_theta.locals, datas):
+          tot += local_log_prior_diff(local_vars, new_local_vars) \
+               + camera_loglike(data, new_local_vars) - camera_loglike(data, local_vars)
+        return tot
 
     # set up inference
     proposal_distn = make_prior_proposer(prior_params, proposal_params, T_cycle)

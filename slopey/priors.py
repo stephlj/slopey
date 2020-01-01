@@ -2,7 +2,7 @@ from __future__ import division
 from __future__ import absolute_import
 import numpy as np
 import numpy.random as npr
-from scipy.special import gammaln, betaln
+from scipy.special import gammaln, betaln, polygamma
 import matplotlib.pyplot as plt
 
 from slopey.util import interleave
@@ -98,7 +98,14 @@ def make_prior(prior_params):
 
         return x, u, ch2_transform, sigma
 
-    def log_prior_diff(theta, new_theta):
-        return log_prior_diff_fast(theta, new_theta, prior_params)
+    def log_gamma_jeffreys(ab):
+      a, b = ab
+      return 0.5 * np.log(a * polygamma(1., a) - 1.) - np.log(b)
 
-    return log_prior_diff, sample_prior
+    def global_log_prior_diff(global_vars, new_global_vars):
+        return (log_gamma_jeffreys(new_global_vars)
+                - log_gamma_jeffreys(global_vars))
+
+    def local_log_prior_diff(local_vars, new_local_vars): return log_prior_diff_fast(local_vars, new_local_vars, prior_params)
+
+    return global_log_prior_diff, local_log_prior_diff, sample_prior
