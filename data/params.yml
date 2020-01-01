@@ -1,6 +1,6 @@
 ## prior hyperparameters
-# slopey time hypers: time_min, time_max
-slopey_time_hypers: 0.14, 4.5
+# slopey time hypers: a, b where mean = a/b, var = a/b^2
+slopey_time_hypers: 1., 1./10
 # flat time hypers: a, b where mean = a/b, var = a/b^2
 flat_time_hypers: 1., 1./10
 # other hyperparameters

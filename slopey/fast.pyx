@@ -1,4 +1,4 @@
-# distutils: extra_compile_args = -O3 -w -ffast-math
+# distutils: extra_compile_args = -O3 -w -ffast-math -mtune=native -march=native
 # distutils: extra_link_args = -lm
 # distutils: libraries = gsl
 # distutils: include_dirs = /opt/local/include
@@ -72,7 +72,6 @@ def propose(
         tuple theta,
         # constants
         double T_cycle,
-        double slopey_time_min, double slopey_time_max,
         # proposal scale parameters
         double u_scale, double ch2_scale,
         double sigma_scale,
@@ -93,11 +92,8 @@ def propose(
     # propose new times
     cdef double[::1] new_times = _new_times[:K]
     for k in range(0,K,2):
-        new_times[k] = dmax(EPS, gamma(r, times[k] * time_scale, 1./time_scale))
-
-        frac = (times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
-        new_times[k+1] = slopey_time_min + (slopey_time_max - slopey_time_min) \
-                * clip(beta(r, frac * time_scale, (1.-frac) * time_scale), EPS, 1.-EPS)
+        new_times[k]   = dmax(EPS, gamma(r, times[k]   * time_scale, 1./time_scale))
+        new_times[k+1] = dmax(EPS, gamma(r, times[k+1] * time_scale, 1./time_scale))
     cumsum(new_times)
 
     # propose new vals
@@ -150,7 +146,6 @@ def logq_diff(
         tuple theta, tuple new_theta,
         # constants
         double T_cycle,
-        double slopey_time_min, double slopey_time_max,
         # proposal scale parameters
         double u_scale, double ch2_scale,
         double sigma_scale,
@@ -183,10 +178,8 @@ def logq_diff(
         total += gamma_log_density(times[k], new_times[k] * time_scale, time_scale) \
                - gamma_log_density(new_times[k], times[k] * time_scale, time_scale)
 
-        frac = (times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
-        new_frac = (new_times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
-        total += beta_log_density(frac, new_frac * time_scale, (1.-new_frac) * time_scale) \
-               - beta_log_density(new_frac, frac * time_scale,     (1.-frac) * time_scale)
+        total += gamma_log_density(times[k+1], new_times[k+1] * time_scale, time_scale) \
+               - gamma_log_density(new_times[k+1], times[k+1] * time_scale, time_scale)
 
     # score vals
     for k in range(K//2+1):
@@ -234,8 +227,8 @@ def log_prior_diff(tuple theta, tuple new_theta, tuple prior_params):
 
     cdef double level_alpha = prior_params[0][0][0], \
                 level_beta  = prior_params[0][0][1], \
-                slopey_time_min = prior_params[0][1][0], \
-                slopey_time_max  = prior_params[0][1][1], \
+                slopey_time_alpha = prior_params[0][1][0], \
+                slopey_time_beta  = prior_params[0][1][1], \
                 flat_time_alpha = prior_params[0][2][0], \
                 flat_time_beta = prior_params[0][2][1], \
                 a_alpha = prior_params[1][0][0], \
@@ -257,12 +250,8 @@ def log_prior_diff(tuple theta, tuple new_theta, tuple prior_params):
         total += gamma_negenergy(new_times[k],   flat_time_alpha,   flat_time_beta) \
                - gamma_negenergy(times[k],       flat_time_alpha,   flat_time_beta)
 
-        # NOTE(mattjj): we don't score slopey times because we assume the prior
-        # is uniform, but it would look something like this:
-        # # frac = (times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
-        # # new_frac = (new_times[k+1] - slopey_time_min) / (slopey_time_max - slopey_time_min)
-        # # total += beta_negenergy(new_frac,   slopey_time_alpha,   slopey_time_beta) \
-        # #        - beta_negenergy(frac,       slopey_time_alpha,   slopey_time_beta)
+        total += gamma_negenergy(new_times[k+1], slopey_time_alpha,   slopey_time_beta) \
+               - gamma_negenergy(times[k+1],     slopey_time_alpha,   slopey_time_beta)
 
     # score vals
     for k in range(K//2+1):
