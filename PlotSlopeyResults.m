@@ -58,9 +58,10 @@ smooth_width = 5;
         % Update 9/2016: adding a smoothed overlay
         plot(xvectData,medfilt2(input_struct.data(:,1),[smooth_width,1]),'-r','Linewidth',1)
         plot(xvectData,medfilt2(input_struct.data(:,2),[smooth_width,1]),'-g','Linewidth',1)
-        % Plot model results--only a random sample of 10 of them
-        toplot = round(length(input_struct.offset).*rand(10,1));
-        for b = 1:length(toplot)
+        % Plot model results--only a random sample of 20 of them
+        % toplot = round(length(input_struct.offset).*rand(10,1));
+        toplot = randi(length(input_struct.offset), [1,10]);
+        for b = toplot
             times = input_struct.times(b,:)+start_time-input_struct.offset(b);
             vals = input_struct.vals(b,:);
             max_red = max(vals);

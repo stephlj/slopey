@@ -7,6 +7,9 @@
 % excluded--first column is slopey start, second is slopey end, third is
 % duration.)
 %
+% Update 1/2020: Looks like the hand_segment argument doesn't work if the
+% cropping differs between what's used in pyhsmm and what's used here.
+%
 % Steph 4/2016
 
 function RunSlopeyAnalysis(datadir_to_analyze,hand_segment)

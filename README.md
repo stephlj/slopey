@@ -30,13 +30,16 @@ There's essentially no limit to how large you set these, but for ease of impleme
 
 ## Running Steph’s Matlab code
 
-To use the information in the goodtraces.txt parameters file from pyhsmm (see [Traces](https://github.com/stephlj/Traces)), first run
+Make a copy of the sample global [params.yml](https://github.com/stephlj/slopey/blob/master/data/params.yml) file, edit the 
+parameters as needed for your data, and save in the same directory as the .mat files to be analyzed (called `<datadir>` below).
+
+Each .mat file can also be analyzed with its own parameters, if a .yml with the same filename but with extension `.params.yml`
+instead of `.mat` is present. To use the information in the goodtraces.txt parameters file from pyhsmm (see [Traces](https://github.com/stephlj/Traces))
+to automatically generate trace-specific parameters, first run
 
 ```matlab
 ConvertGoodTracesToYAML(<datadir>)
 ```
-
-Ensure that datadir has a global params.yml file.
 
 Because Steph does have a crazy directory structure with spaces, you will need to run the build command as above. If you try to run slopey either through the Terminal
 or by running RunSlopeyAnalysis in Matlab, and get:

@@ -15,3 +15,4 @@ num_iterations: 100000
 # 7.4 fps
 T_cycle: 0.1356
 T_blank: 0.0356
+noise_sigmasq: 0.075
